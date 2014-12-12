@@ -1,0 +1,124 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../th-theme/th-theme.html">
+<link rel="import" href="../th-lens-node/th-lens-node.html">
+
+
+<polymer-element name="th-lens-composer">
+  <core-style ref="theme"></theme>
+  <template>
+    <style>
+
+    </style>
+    <!-- Handles server side communication --> 
+    <core-ajax></core-ajax>
+
+    <!-- Menu of components? --> 
+    <th-component-list></th-component-list>
+
+    <!-- Nodes -->
+    <div id="nodeContainer">
+      <template repeat="{{component, index in components}}">
+        <template if="{{index == 0}}">
+          <th-lens-node type="{{component.type}}" componentId="{{component.tag.id}}">
+            <content select="#{{component.tag.id}}"></content>
+          </th-lens-node>
+        </template>
+        <template if="{{index > 0}}">
+          <th-lens-node type="{{component.type}}" componentId="{{component.tag.id}}" input="{{components[index-1].tag.output}}">
+            <content select="#{{component.tag.id}}"></content>
+          </th-lens-node>
+        </template>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+
+      Polymer('th-lens-composer', {
+        components: [],
+        ready: function(){
+          var self = this;
+          self._setupComponents();
+        },
+        _setupComponents: function(){
+          var self = this,
+              boringTags = ['div','ul','li','span','th-editor','br'];
+          
+          self.components = [];
+
+          var elements = self.querySelectorAll('*'); 
+          [].forEach.call(elements, function(el, i) {
+              var elName = el.tagName.toLowerCase();
+
+              // Set unique ID to each element
+              el.id = el.id || self.generateUniqueId(elName);
+
+              var index=boringTags.indexOf(elName);
+              if(index<0) {
+                self.components.push(
+                  { tag: el, // DOM element
+                    id: el.id, // unique ID
+                    name: elName, // name of element
+                    type:  el.className // TODO: reference metadata instead of using classes
+                  }
+                );
+              }
+          });
+
+          this._connectNodes();
+        },
+        _addNode: function(){
+          console.log("add node");
+          var newNode = { 
+            type:"edit" // TODO: dynamically assign type, and assign other details when a component is specified for the node
+          }
+          this.components.splice(2,0,newNode); // determine correct place to insert node
+          this._connectNodes();
+        },
+        _deleteNode: function(){
+          var self = this;
+          console.log("delete node");
+          this._connectNodes();
+        },
+        _connectNodes: function(){
+          var self = this;
+          for (var i=1; i<self.components.length; i++){
+            (function() {
+                var source = self.components[i-1].tag,
+                    target = self.components[i].tag;
+
+                if (source && target){
+                  var observer = new PathObserver(source, 'output');     
+                  observer.open(function(newValue, oldValue) {
+                     target.input = newValue;
+                  });
+                }
+                target.input = source.output; 
+            })();
+
+            
+          }
+        },
+        generateUniqueId: function(elName){
+          var self = this;
+          var num = 0;
+          var tagsWithSameName = self.components.filter(function(elem){return elem.name == elName});
+          
+          if(tagsWithSameName){
+            num+= tagsWithSameName.length;
+          } 
+          
+          var uniqueId = elName + '-' + num;
+          
+          return uniqueId;
+        // },
+        // createNewElement: function(){
+        //   console.log("***")
+        //   var newEl = document.createElement('th-google-map');
+        //   console.log(newEl);
+        }
+      });
+
+  </script>
+</polymer-element>
