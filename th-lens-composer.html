@@ -13,13 +13,9 @@
       }
 
       .add-button {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background-color: black;
+        width: 24px;
         position: relative;
-        color: white;
-        text-align: center;
+        display: block;
         cursor: pointer;
         margin: 50px auto;
       }
@@ -32,12 +28,11 @@
 
       .delete-button {
         position: absolute;
-        /*float: right;*/
-        top: 3px;
-        right: 0px;
+        right: 3px;
         cursor: pointer;
-        width: 15px;
+        width: 18px;
         z-index: 1;
+
       }
 
       ::content > * {
@@ -58,13 +53,13 @@
       <template repeat="{{node, index in nodes}}">
 
         <template if="{{index > 0}}">
-          <div class="add-button" data-index="{{index}}" on-click="{{_addNode}}">+</div>
+          <core-icon class="add-button" icon="add-circle" data-index="{{index}}" on-click="{{_addNode}}"></core-icon>
         </template>
         <div class="node-container">
           <template if="{{index > 0 && index < (nodes.length - 1)}}">
-            <div class="delete-button" data-index="{{index}}" on-click="{{_deleteNode}}">x</div>
+            <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
           </template>
-          <content select="#{{node.id}}"></content>
+          <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
         </div>
       </template>
     </div>
@@ -189,11 +184,28 @@
           var uniqueId = elName + '-' + self.uniqueCounter;
           
           self.uniqueCounter+= 1;
-          
-          
-          
-          
+
           return uniqueId;
+        },
+        toggleNodes: function(e, detail, selection){
+          var self = this;
+          
+          // Collapse all sections
+          for(var i=0;i<self.nodes.length; i++){
+            var node = self.nodes[i].tag.shadowRoot,
+                sections = node.querySelectorAll('core-collapse');
+            for (var index=0; index<sections.length; index++){
+              sections[index].opened = false;
+            }
+          }
+
+          // Expand sections of selected node
+          var currentNode = self.querySelector(selection.select).shadowRoot,
+              currentSections = currentNode.querySelectorAll('core-collapse')
+          for (var i=0; i<currentSections.length; i++){
+            currentSections[i].opened = true;
+          }   
+
         }
       });
 
