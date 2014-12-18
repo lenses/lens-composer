@@ -1,7 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../th-theme/th-theme.html">
 <link rel="import" href="../th-lens-node/th-lens-node.html">
-<link rel="import" href="../th-data-transform/th-data-transform.html">
 
 <polymer-element name="th-lens-composer" attributes="componentList lensTitle">
   <core-style ref="theme"></theme>
@@ -129,7 +128,7 @@
           var self = this;
           var newEl = document.createElement(name);
           newEl.id = self.generateUniqueId(name);
-          newEl.type = "transform";
+          newEl.type = "transform"; // this should be set when the element is created -- otherwise it doesnt behave the same way
           
           console.log(newEl);
           self.appendChild(newEl);
