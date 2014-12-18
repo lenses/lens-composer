@@ -9,20 +9,22 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>th-connector Demo</title>
+  <title>Lens Composer Demo</title>
 
   <script src="../webcomponentsjs/webcomponents.js"></script>
   <link rel="import" href="th-lens-composer.html">
+  <link rel="import" href="../th-lens-node/th-lens-node.html">
   <link rel="import" href="../th-mapbox/th-mapbox.html">
   <link rel="import" href="../th-geocoder-firebase/th-geocoder-firebase.html">
   <link rel="import" href="../th-csv/th-csv.html">
   <link rel="import" href="../th-enigma/th-enigma.html">
   <link rel="import" href="../th-google-map/th-google-map.html">
   <link rel="import" href="../th-map-us/th-map-us.html">
-  <link rel="import" href="../th-table-data/th-table-data.html">
+  <link rel="import" href="../th-data-table/th-data-table.html">
   <link rel="import" href="../th-array-function/th-array-function.html">
   <link rel="import" href="../th-n-bar-chart/th-n-bar-chart.html">
   <link rel="import" href="../th-chart-data-filter/th-chart-data-filter.html">
+  <link rel="import" href="../hot-table/src/hot-table.html">
 
 </head>
 <style type="text/css">
@@ -60,10 +62,16 @@
 </style>
 
   <th-lens-composer>
-      <th-table-data class="input"></th-table-data>
-      <th-geocoder-firebase class="edit" firebaseLocation="https://sweltering-fire-3844.firebaseio.com/" style="min-width: 150px"></th-geocoder-firebase>
-      <th-google-map class="visualize" width="300" height="300"></th-google-map>
+    <th-lens-node type="input">
+      <th-data-table></th-data-table>
+    </th-lens-node>
+    <th-lens-node type="transform"></th-lens-node>
+    <th-lens-node type="visual">
+      <th-google-map style="width: 100%; "></th-google-map>
+    </th-lens-node>
   </th-lens-composer>
+
+
 
 </body>
 

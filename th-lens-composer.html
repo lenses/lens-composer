@@ -1,33 +1,71 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../th-theme/th-theme.html">
 <link rel="import" href="../th-lens-node/th-lens-node.html">
+<link rel="import" href="../th-data-transform/th-data-transform.html">
 
-
-<polymer-element name="th-lens-composer">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle">
   <core-style ref="theme"></theme>
   <template>
     <style>
 
+      h1 {
+        text-align: center;
+      }
+
+      .add-button {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: black;
+        position: relative;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        margin: 50px auto;
+      }
+
+      .node-container {
+        position: relative;
+        width: 80%;
+        margin: 0 auto;
+      }
+
+      .delete-button {
+        position: absolute;
+        /*float: right;*/
+        top: 3px;
+        right: 0px;
+        cursor: pointer;
+        width: 15px;
+        z-index: 1;
+      }
+
+      ::content > * {
+        width: 100%;
+        height: 100%;
+      }
     </style>
+    <h1>{{lensTitle}}</h1>
     <!-- Handles server side communication --> 
     <core-ajax></core-ajax>
 
     <!-- Menu of components? --> 
-    <th-component-list></th-component-list>
+    <!-- <th-component-list></th-component-list> -->
 
     <!-- Nodes -->
     <div id="nodeContainer">
-      <template repeat="{{component, index in components}}">
-        <template if="{{index == 0}}">
-          <th-lens-node type="{{component.type}}" componentId="{{component.tag.id}}">
-            <content select="#{{component.tag.id}}"></content>
-          </th-lens-node>
-        </template>
+      
+      <template repeat="{{node, index in nodes}}">
+
         <template if="{{index > 0}}">
-          <th-lens-node type="{{component.type}}" componentId="{{component.tag.id}}" input="{{components[index-1].tag.output}}">
-            <content select="#{{component.tag.id}}"></content>
-          </th-lens-node>
+          <div class="add-button" data-index="{{index}}" on-click="{{_addNode}}">+</div>
         </template>
+        <div class="node-container">
+          <template if="{{index > 0 && index < (nodes.length - 1)}}">
+            <div class="delete-button" data-index="{{index}}" on-click="{{_deleteNode}}">x</div>
+          </template>
+          <content select="#{{node.id}}"></content>
+        </div>
       </template>
     </div>
 
@@ -36,57 +74,102 @@
   <script>
 
       Polymer('th-lens-composer', {
-        components: [],
+        lensTitle: 'Lens Composer',
+        uniqueCounter: 0,
+        componentList: [
+          {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
+          {name: 'th-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          {name:'th-data-table', friendly: 'Data table', type: 'input'},
+          {name:'th-array-function', friendly: 'Map/Reduce/Filter Functions', type: 'transform'},
+          {name:'th-geocoder-firebase', friendly: 'Geocode Data', type: 'transform'},
+          {name:'th-chart-data-filter', friendly: 'Convert Data to Chart Format', type: 'transform'},
+          {name:'th-google-map', friendly: 'Google Map', type: 'visual'},
+          {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visual'}
+        ],
         ready: function(){
           var self = this;
-          self._setupComponents();
+          self.componentMenu = {
+            input: self.componentList.filter(function(component){ return component.type == 'input' }),
+            transform: self.componentList.filter(function(component){ return component.type == 'transform' }),
+            visual: self.componentList.filter(function(component){ return component.type == 'visual' })
+          };
+          
+          self._setupNodes();
+
         },
-        _setupComponents: function(){
+        _setupNodes: function(){
           var self = this,
               boringTags = ['div','ul','li','span','th-editor','br'];
           
-          self.components = [];
+          self.nodes = [];
 
-          var elements = self.querySelectorAll('*'); 
+          var elements = self.querySelectorAll('th-lens-node'); 
           [].forEach.call(elements, function(el, i) {
               var elName = el.tagName.toLowerCase();
 
               // Set unique ID to each element
               el.id = el.id || self.generateUniqueId(elName);
+              
 
               var index=boringTags.indexOf(elName);
               if(index<0) {
-                self.components.push(
+                self.nodes.push(
                   { tag: el, // DOM element
                     id: el.id, // unique ID
-                    name: elName, // name of element
-                    type:  el.className // TODO: reference metadata instead of using classes
+                    name: elName // th-lens-node
                   }
                 );
               }
           });
 
           this._connectNodes();
+         
         },
-        _addNode: function(){
+        _createNewEl: function(name){
+          var self = this;
+          var newEl = document.createElement(name);
+          newEl.id = self.generateUniqueId(name);
+          newEl.type = "transform";
+          
+          console.log(newEl);
+          self.appendChild(newEl);
+          return newEl;
+        },
+        _addNode: function(e, detail, selection){
           console.log("add node");
+          var self = this,
+              newEl = self._createNewEl('th-lens-node');
+          
+          
+          
+          var index = selection.dataset.index;
+          console.log(index);
           var newNode = { 
-            type:"edit" // TODO: dynamically assign type, and assign other details when a component is specified for the node
+            name: 'th-lens-node',
+            id: newEl.id,
+            tag: newEl
           }
-          this.components.splice(2,0,newNode); // determine correct place to insert node
-          this._connectNodes();
+          
+
+          self.nodes.splice(index,0,newNode); // determine correct place to insert node
+          self._connectNodes();
+          console.log(self.nodes);
         },
-        _deleteNode: function(){
+        _deleteNode: function(e, detail, selection){
           var self = this;
           console.log("delete node");
+          
+          var index = selection.dataset.index;
+          self.removeChild(self.nodes[index].tag);
+          self.nodes.splice(index, 1)
           this._connectNodes();
         },
         _connectNodes: function(){
           var self = this;
-          for (var i=1; i<self.components.length; i++){
+          for (var i=1; i<self.nodes.length; i++){
             (function() {
-                var source = self.components[i-1].tag,
-                    target = self.components[i].tag;
+                var source = self.nodes[i-1].tag,
+                    target = self.nodes[i].tag;
 
                 if (source && target){
                   var observer = new PathObserver(source, 'output');     
@@ -102,21 +185,15 @@
         },
         generateUniqueId: function(elName){
           var self = this;
-          var num = 0;
-          var tagsWithSameName = self.components.filter(function(elem){return elem.name == elName});
           
-          if(tagsWithSameName){
-            num+= tagsWithSameName.length;
-          } 
+          var uniqueId = elName + '-' + self.uniqueCounter;
           
-          var uniqueId = elName + '-' + num;
+          self.uniqueCounter+= 1;
+          
+          
+          
           
           return uniqueId;
-        // },
-        // createNewElement: function(){
-        //   console.log("***")
-        //   var newEl = document.createElement('th-google-map');
-        //   console.log(newEl);
         }
       });
 
