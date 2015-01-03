@@ -29,9 +29,11 @@
       .delete-button {
         position: absolute;
         right: 3px;
+        top: 3px;
         cursor: pointer;
-        width: 18px;
+        width: 2px;
         z-index: 1;
+        color: white;
 
       }
 
@@ -169,6 +171,8 @@
                 if (source && target){
                   var observer = new PathObserver(source, 'output');     
                   observer.open(function(newValue, oldValue) {
+                     console.log(source);
+                     console.log("output changed!");
                      target.input = newValue;
                   });
                 }
