@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../th-theme/th-theme.html">
 <link rel="import" href="../th-lens-node/th-lens-node.html">
-
+<link rel="import" href="../core-ajax/core-ajax.html">
 
 <polymer-element name="th-lens-composer" attributes="componentList lensTitle">
   <core-style ref="theme"></theme>
@@ -44,7 +44,8 @@
     </style>
     <h1>{{lensTitle}}</h1>
     <!-- Handles server side communication --> 
-    <core-ajax></core-ajax>
+    <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
+      <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
 
     <!-- Menu of components? --> 
     <!-- <th-component-list></th-component-list> -->
@@ -210,6 +211,29 @@
             currentSections[i].opened = true;
           }   
 
+        },
+        save: function(){
+          var self = this,
+              component = self.nodes[self.nodes.length-1].tag.component;
+
+          self.element_data = { "lens":{ "components_attributes": {} }};
+              
+          if (component){
+            var currentstate = component.getState ? component.getState() : "";
+
+            self.element_data["lens"]["components_attributes"][0]= {
+              id: 458,
+              tagname: component.tagName.toLowerCase(),
+              final_result: true,
+              currentstate: currentstate
+            }
+            console.log(JSON.stringify(self.element_data))
+            self.element_data = JSON.stringify(self.element_data);
+            console.log(self.element_data);
+            self.$.create.go();
+            // core ajax cannot currently handle posting nested objects -- see github issue #37 
+            // 
+          }
         }
       });
 
