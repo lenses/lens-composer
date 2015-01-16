@@ -5,6 +5,6 @@
   "main": "th-lens-composer.html",
   "dependencies": {
     "polymer": "Polymer/polymer#~0.5.1",
-    "th-lens-node": "thelmanews/th-lens-node"
+    "th-lens-node": "lenses/th-lens-node"
   }
 }
