@@ -2,6 +2,8 @@
 <link rel="import" href="../th-theme/th-theme.html">
 <link rel="import" href="../th-lens-node/th-lens-node.html">
 <link rel="import" href="../core-ajax/core-ajax.html">
+<link rel="import" href="../core-icons/image-icons.html">
+<link rel="import" href="../core-icons/editor-icons.html">
 
 <polymer-element name="th-lens-composer" attributes="componentList lensTitle">
   <core-style ref="theme"></theme>
@@ -13,11 +15,16 @@
       }
 
       .add-button {
-        width: 24px;
+        width: 36px;
+        height: 36px;
         position: relative;
-        display: block;
+        display: inline-block;
         cursor: pointer;
+        margin: 20px;
+      }
+      .add-options {
         margin: 50px auto;
+        text-align: center;
       }
 
       .node-container {
@@ -56,7 +63,11 @@
       <template repeat="{{node, index in nodes}}">
 
         <template if="{{index > 0}}">
-          <core-icon class="add-button" icon="add-circle" data-index="{{index}}" on-click="{{_addNode}}"></core-icon>
+          <!-- <core-icon class="add-button" icon="add-circle" data-index="{{index}}" on-click="{{_addNode}}"></core-icon> -->
+          <div class="add-options"><span>asd</span>
+            <core-icon class="add-button" data-node-type="transform" icon="image:transform" data-index="{{index}}" on-click="{{_addNode}}"></core-icon>
+            <core-icon class="add-button" data-node-type="visualize" icon="editor:insert-chart" data-index="{{index}}" on-click="{{_addNode}}"></core-icon>
+          </div>
         </template>
         <div class="node-container">
           <template if="{{index > 0 && index < (nodes.length - 1)}}">
@@ -123,11 +134,11 @@
           this._connectNodes();
          
         },
-        _createNewEl: function(name){
+        _createNewEl: function(name, type){
           var self = this;
           var newEl = document.createElement(name);
           newEl.id = self.generateUniqueId(name);
-          newEl.type = "transform"; // this should be set when the element is created -- otherwise it doesnt behave the same way
+          newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           
           console.log(newEl);
           self.appendChild(newEl);
@@ -136,12 +147,10 @@
         _addNode: function(e, detail, selection){
           console.log("add node");
           var self = this,
-              newEl = self._createNewEl('th-lens-node');
-          
-          
+              type = selection.dataset.nodeType,
+              newEl = self._createNewEl('th-lens-node', type);
           
           var index = selection.dataset.index;
-          console.log(index);
           var newNode = { 
             name: 'th-lens-node',
             id: newEl.id,
@@ -151,7 +160,6 @@
 
           self.nodes.splice(index,0,newNode); // determine correct place to insert node
           self._connectNodes();
-          console.log(self.nodes);
         },
         _deleteNode: function(e, detail, selection){
           var self = this;
