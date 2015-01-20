@@ -5,6 +5,9 @@
   "main": "th-lens-composer.html",
   "dependencies": {
     "polymer": "Polymer/polymer#~0.5.1",
-    "th-lens-node": "lenses/th-lens-node"
+    "th-lens-node": "lenses/th-lens-node",
+    "lenses-input-elements": "lenses/lenses-input-elements",
+    "lenses-transform-elements": "lenses/lenses-transform-elements",
+    "lenses-visual-elements": "lenses/lenses-visual-elements"
   }
 }
