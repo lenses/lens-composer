@@ -5,7 +5,7 @@
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle pathToComponents">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -120,6 +120,7 @@
           {name:'th-google-map', friendly: 'Google Map', type: 'visualize'},
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
+        pathToComponents: '../',
         ready: function(){
           var self = this;
           self.componentMenu = {
@@ -164,6 +165,7 @@
           var newEl = document.createElement(name);
           newEl.id = self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
+          newEl.pathToComponents = self.pathToComponents;
           
           console.log(newEl);
           self.appendChild(newEl);
