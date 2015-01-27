@@ -129,6 +129,14 @@
             visualize: self.componentList.filter(function(component){ return component.type == 'visualize' })
           };
           
+          this.addEventListener('th-select-final-result', function(response) {
+            console.log('SELECT FINAL RESULT');
+            // console.log(response);
+            // console.log(response.detail.component);
+            // console.log(self.nodes);
+            self.selectFinalResult(response.detail);
+          }.bind(this));
+
           self._setupNodes();
 
         },
@@ -269,6 +277,19 @@
             // core ajax cannot currently handle posting nested objects -- see github issue #37 
             // 
           }
+        },
+        selectFinalResult: function(response){
+          var self= this;
+
+          for(i=0;i<self.nodes.length;i++){
+            var checkMark = self.nodes[i].tag.shadowRoot.querySelector('#checkmark'),
+                component = self.nodes[i].tag.component;
+
+            if (checkMark){ checkMark.classList.remove('final-result-selected'); }
+            if (component){ component.classList.remove('final-result');}
+          }
+          // response.component.classList.add('final-result');
+          // response.selection.classList.add('final-result-selected');
         }
       });
 
