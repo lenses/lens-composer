@@ -109,7 +109,7 @@
 
       Polymer('th-lens-composer', {
         lensTitle: 'Lens Composer',
-        uniqueCounter: 0,
+        // uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
           {name: 'th-enigma', friendly: 'Enigma Data Loader', type: 'input'},
@@ -121,8 +121,10 @@
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
         pathToComponents: '../',
+        nodes: [{'id':'th-lens-node-0', 'name':'th-lens-node', 'type':'input'},{'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize'}],
         ready: function(){
           var self = this;
+          self.uniqueCounter = self.nodes.length;
           self.componentMenu = {
             input: self.componentList.filter(function(component){ return component.type == 'input' }),
             transform: self.componentList.filter(function(component){ return component.type == 'transform' }),
@@ -142,36 +144,47 @@
         },
         _setupNodes: function(){
           var self = this,
-              boringTags = ['div','ul','li','span','th-editor','br'];
+              boringTags = ['div','ul','li','span','th-editor','br'],
+              numNodes = self.nodes.length;
           
-          self.nodes = [];
+          // If nodes array is given, recreate elements
+          if (numNodes > 0){
+            for(var i=0;i<numNodes; i++){
+              var node = self.nodes[i];
+              var newEl = self._createNewEl(node.name, node.type, node.id);
+              node.tag = newEl;
+            }
+            self._connectNodes;
+          
+          // Otherwise use child elements to create nodes array
+          } else { 
+            var elements = self.querySelectorAll('th-lens-node'); 
+            [].forEach.call(elements, function(el, i) {
+                var elName = el.tagName.toLowerCase();
 
-          var elements = self.querySelectorAll('th-lens-node'); 
-          [].forEach.call(elements, function(el, i) {
-              var elName = el.tagName.toLowerCase();
+                // Set unique ID to each element
+                el.id = el.id || self.generateUniqueId(elName);
+                
 
-              // Set unique ID to each element
-              el.id = el.id || self.generateUniqueId(elName);
-              
-
-              var index=boringTags.indexOf(elName);
-              if(index<0) {
-                self.nodes.push(
-                  { tag: el, // DOM element
-                    id: el.id, // unique ID
-                    name: elName // th-lens-node
-                  }
-                );
-              }
-          });
+                var index=boringTags.indexOf(elName);
+                if(index<0) {
+                  self.nodes.push(
+                    { tag: el, // DOM element
+                      id: el.id, // unique ID
+                      name: elName // th-lens-node
+                    }
+                  );
+                }
+            });
+          }
 
           this._connectNodes();
          
         },
-        _createNewEl: function(name, type){
+        _createNewEl: function(name, type, id){
           var self = this;
           var newEl = document.createElement(name);
-          newEl.id = self.generateUniqueId(name);
+          newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.pathToComponents = self.pathToComponents;
           
