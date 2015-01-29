@@ -4,6 +4,7 @@
 <link rel="import" href="../core-ajax/core-ajax.html">
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
+<link rel="import" href="../paper-input/paper-input.html">
 
 <polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor pathToComponents nodes">
   <core-style ref="theme"></theme>
@@ -73,10 +74,20 @@
         opacity: 0.5
       }
 
+      paper-input /deep/ ::content * {
+        text-align: center;
+      }
+
+      paper-input {
+        width: auto;
+      }
+
 
     </style>
-    <h1>{{lensTitle}}</h1>
-    <h3>{{lensAuthor}}</h3>
+
+    <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
+    <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
+
     <!-- Handles server side communication --> 
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
@@ -312,14 +323,8 @@
           var self= this;
 
           for(i=0;i<self.nodes.length;i++){
-            var checkMark = self.nodes[i].tag.shadowRoot.querySelector('#checkmark'),
-                component = self.nodes[i].tag.component;
-
-            if (checkMark){ checkMark.classList.remove('final-result-selected'); }
-            if (component){ component.classList.remove('final-result');}
+            self.nodes[i].tag.finalResult = false;    
           }
-          // response.component.classList.add('final-result');
-          // response.selection.classList.add('final-result-selected');
         },
         getState: function(){
           var self = this;
@@ -338,7 +343,24 @@
           })
           console.log(nodes);
           // self.output = nodes;
-return nodes;
+          return nodes;
+        },
+        getFinalResult: function(){
+          var self = this;
+          for (var i=0; i<self.nodes.length; i++){
+            var node =self.nodes[i].tag;
+            if (node.finalResult){
+              console.log(node.component);
+              var componentState = self._getComponentState(node.component),
+                  componentName = node.component.tagName.toLowerCase();
+              console.log(componentState);
+              return {  'componentName': componentName,
+                        'componentState': componentState
+                      }
+            }
+          }
+
+          return;
         },
         _addComponentInfoToNode: function(node){
           var self = this;
