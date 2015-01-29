@@ -5,12 +5,12 @@
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle pathToComponents nodes">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor pathToComponents nodes">
   <core-style ref="theme"></theme>
   <template>
     <style>
 
-      h1 {
+      h1, h3 {
         text-align: center;
       }
 
@@ -76,6 +76,7 @@
 
     </style>
     <h1>{{lensTitle}}</h1>
+    <h3>{{lensAuthor}}</h3>
     <!-- Handles server side communication --> 
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
@@ -108,7 +109,8 @@
   <script>
 
       Polymer('th-lens-composer', {
-        lensTitle: 'Lens Composer',
+        // lensTitle: 'Example Lens',
+        // lensAuthor: 'Nisha Batra',
         // uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
@@ -126,6 +128,8 @@
         //         {'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize', 'componentName':'th-google-bar-chart', 'componentState': '{"input":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"chartData":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"selectedLabel":"Name","selectedValues":["AVG Annual Salary"],"orientation":"horizontal","legend":true,"animateOnInit":true,"animateAfter":0}'}],
         ready: function(){
           var self = this;
+          console.log(self.nodes);
+          // console.log(JSON.parse(self.nodes));
           self.uniqueCounter = self.nodes.length;
           self.componentMenu = {
             input: self.componentList.filter(function(component){ return component.type == 'input' }),
@@ -200,7 +204,7 @@
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.pathToComponents = self.pathToComponents;
           
-          console.log(newEl);
+          // console.log(newEl);
           self.appendChild(newEl);
           return newEl;
         },
@@ -317,7 +321,7 @@
           // response.component.classList.add('final-result');
           // response.selection.classList.add('final-result-selected');
         },
-        saveLens: function(){
+        getState: function(){
           var self = this;
           
           var nodes = self.nodes.map(function(node){
@@ -327,8 +331,8 @@
                newNode[key] = node[key];
             });
             
-            self.addComponentInfoToNode(newNode);
-            self.removeHTMLfromNode(newNode);
+            self._addComponentInfoToNode(newNode);
+            self._removeHTMLfromNode(newNode);
             
             return newNode;
           })
@@ -336,18 +340,18 @@
           // self.output = nodes;
 return nodes;
         },
-        addComponentInfoToNode: function(node){
+        _addComponentInfoToNode: function(node){
           var self = this;
           if(node.tag.component){
             node.componentName = node.tag.component.tagName.toLowerCase();
-            node.componentState = self.getComponentState(node.tag.component);
+            node.componentState = self._getComponentState(node.tag.component);
           }
         },
-        removeHTMLfromNode: function(node){
+        _removeHTMLfromNode: function(node){
           delete node.tag;
 
         },
-        getComponentState: function(component){
+        _getComponentState: function(component){
           var currentState = {};
           for(var attribute in component.publish){
             currentState[attribute] = component[attribute];
