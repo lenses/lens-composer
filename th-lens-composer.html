@@ -5,7 +5,7 @@
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle pathToComponents">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle pathToComponents nodes">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -121,8 +121,9 @@
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
         pathToComponents: '../',
-        nodes: [{'id':'th-lens-node-0', 'name':'th-lens-node', 'type':'input', 'componentName':'th-data-table', 'componentState': '{"input":[["Name",null,null,null,null],["Abdul-Quddus, Isa",null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null]],"output":[{"Name":"Abdul-Quddus, Isa"}],"readOnly":false,"outputType":"json","firstRowIsHeader":true,"requireSelection":false,"minimal":false,"minCols":5,"minRows":5}'},
-                {'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize', 'componentName':'th-google-bar-chart', 'componentState': '{"input":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"chartData":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"selectedLabel":"Name","selectedValues":["AVG Annual Salary"],"orientation":"horizontal","legend":true,"animateOnInit":true,"animateAfter":0}'}],
+        nodes: [],
+        // nodes: [{'id':'th-lens-node-0', 'name':'th-lens-node', 'type':'input', 'componentName':'th-data-table', 'componentState': '{"input":[["Name","AVG Annual Salary",null,null,null],["Abdul-Quddus, Isa","695,000",null,null,null],["Abdullah, Husain","1,137,500",null,null,null],["Aboushi, Oday","589,750",null,null,null],[null,null,null,null,null]],"output":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"readOnly":false,"outputType":"json","firstRowIsHeader":true,"requireSelection":false,"minimal":false,"minCols":5,"minRows":5}'},
+        //         {'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize', 'componentName':'th-google-bar-chart', 'componentState': '{"input":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"chartData":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"selectedLabel":"Name","selectedValues":["AVG Annual Salary"],"orientation":"horizontal","legend":true,"animateOnInit":true,"animateAfter":0}'}],
         ready: function(){
           var self = this;
           self.uniqueCounter = self.nodes.length;
@@ -147,16 +148,21 @@
           var self = this,
               boringTags = ['div','ul','li','span','th-editor','br'],
               numNodes = self.nodes.length;
-          
+
           // If nodes array is given, recreate elements
           if (numNodes > 0){
             for(var i=0;i<numNodes; i++){
-              var node = self.nodes[i];
-              var newEl = self._createNewEl(node.name, node.type, node.id);
-              node.tag = newEl;
-              if (node.componentName){
-                // console.log(JSON.parse(node.componentState));
-                newEl.createElement(node.componentName, JSON.parse(node.componentState));
+              var node = self.nodes[i],
+                  nodeExists = document.querySelector('#'+node.id) ? true : false;
+              
+              if (!nodeExists){
+                node.tag = self._createNewEl(node.name, node.type, node.id);
+          
+                if (node.componentName){
+                  // console.log(JSON.parse(node.componentState));
+                  var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
+                  node.tag.createElement(node.componentName, componentState);
+                }
               }
             }
             self._connectNodes;
@@ -170,13 +176,14 @@
                 // Set unique ID to each element
                 el.id = el.id || self.generateUniqueId(elName);
                 
-
                 var index=boringTags.indexOf(elName);
                 if(index<0) {
                   self.nodes.push(
                     { tag: el, // DOM element
                       id: el.id, // unique ID
-                      name: elName // th-lens-node
+                      name: elName, // th-lens-node
+                      type: el.type
+
                     }
                   );
                 }
@@ -274,29 +281,29 @@
           }   
 
         },
-        save: function(){
-          var self = this,
-              component = self.nodes[self.nodes.length-1].tag.component;
+        // save: function(){
+        //   var self = this,
+        //       component = self.nodes[self.nodes.length-1].tag.component;
 
-          self.element_data = { "lens":{ "components_attributes": {} }};
+        //   self.element_data = { "lens":{ "components_attributes": {} }};
               
-          if (component){
-            var currentstate = component.getState ? component.getState() : "";
+        //   if (component){
+        //     var currentstate = component.getState ? component.getState() : "";
 
-            self.element_data["lens"]["components_attributes"][0]= {
-              id: 458,
-              tagname: component.tagName.toLowerCase(),
-              final_result: true,
-              currentstate: currentstate
-            }
-            console.log(JSON.stringify(self.element_data))
-            self.element_data = JSON.stringify(self.element_data);
-            console.log(self.element_data);
-            self.$.create.go();
-            // core ajax cannot currently handle posting nested objects -- see github issue #37 
-            // 
-          }
-        },
+        //     self.element_data["lens"]["components_attributes"][0]= {
+        //       id: 458,
+        //       tagname: component.tagName.toLowerCase(),
+        //       final_result: true,
+        //       currentstate: currentstate
+        //     }
+        //     console.log(JSON.stringify(self.element_data))
+        //     self.element_data = JSON.stringify(self.element_data);
+        //     console.log(self.element_data);
+        //     self.$.create.go();
+        //     // core ajax cannot currently handle posting nested objects -- see github issue #37 
+        //     // 
+        //   }
+        // },
         selectFinalResult: function(response){
           var self= this;
 
@@ -326,6 +333,7 @@
             return newNode;
           })
           console.log(nodes);
+          // self.output = nodes;
 return nodes;
         },
         addComponentInfoToNode: function(node){
@@ -346,6 +354,10 @@ return nodes;
           }
           return JSON.stringify(currentState);
 
+        },
+        nodesChanged: function(){
+          // console.log("setup nodes");
+          // this._setupNodes();
         }
 
       });
