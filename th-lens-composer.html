@@ -296,29 +296,6 @@
           }   
 
         },
-        // save: function(){
-        //   var self = this,
-        //       component = self.nodes[self.nodes.length-1].tag.component;
-
-        //   self.element_data = { "lens":{ "components_attributes": {} }};
-              
-        //   if (component){
-        //     var currentstate = component.getState ? component.getState() : "";
-
-        //     self.element_data["lens"]["components_attributes"][0]= {
-        //       id: 458,
-        //       tagname: component.tagName.toLowerCase(),
-        //       final_result: true,
-        //       currentstate: currentstate
-        //     }
-        //     console.log(JSON.stringify(self.element_data))
-        //     self.element_data = JSON.stringify(self.element_data);
-        //     console.log(self.element_data);
-        //     self.$.create.go();
-        //     // core ajax cannot currently handle posting nested objects -- see github issue #37 
-        //     // 
-        //   }
-        // },
         selectFinalResult: function(response){
           var self= this;
 
@@ -326,7 +303,7 @@
             self.nodes[i].tag.finalResult = false;    
           }
         },
-        getState: function(){
+        saveLens: function(){
           var self = this;
           
           var nodes = self.nodes.map(function(node){
@@ -350,10 +327,8 @@
           for (var i=0; i<self.nodes.length; i++){
             var node =self.nodes[i].tag;
             if (node.finalResult){
-              console.log(node.component);
               var componentState = self._getComponentState(node.component),
                   componentName = node.component.tagName.toLowerCase();
-              console.log(componentState);
               return {  'componentName': componentName,
                         'componentState': componentState
                       }
