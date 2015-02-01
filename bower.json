@@ -8,6 +8,7 @@
     "th-lens-node": "lenses/th-lens-node",
     "lenses-input-elements": "lenses/lenses-input-elements",
     "lenses-transform-elements": "lenses/lenses-transform-elements",
-    "lenses-visual-elements": "lenses/lenses-visual-elements"
+    "lenses-visual-elements": "lenses/lenses-visual-elements",
+    "paper-input": "polymer/paper-input#~0.5.4"
   }
 }
