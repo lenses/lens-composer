@@ -336,9 +336,9 @@
         recreateLens: function(nodesArray){
           var self = this,
               numNodes = nodesArray.length;
-
+          self.nodes = nodesArray;
             for(var i=0;i<numNodes; i++){
-              var node = nodesArray[i],
+              var node = self.nodes[i],
                   nodeExists = document.querySelector('#'+node.id) ? true : false;
               
               if (!nodeExists){
