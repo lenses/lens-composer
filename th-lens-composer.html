@@ -139,6 +139,7 @@
         //         {'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize', 'componentName':'th-google-bar-chart', 'componentState': '{"input":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"chartData":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"selectedLabel":"Name","selectedValues":["AVG Annual Salary"],"orientation":"horizontal","legend":true,"animateOnInit":true,"animateAfter":0}'}],
         ready: function(){
           var self = this;
+          self.fire('th-lens-composer-ready', self)
           console.log(self.nodes);
           // console.log(JSON.parse(self.nodes));
           self.uniqueCounter = self.nodes.length;
@@ -167,25 +168,25 @@
 
           // If nodes array is given, recreate elements
           if (numNodes > 0){
-            for(var i=0;i<numNodes; i++){
-              var node = self.nodes[i],
-                  nodeExists = document.querySelector('#'+node.id) ? true : false;
+            // for(var i=0;i<numNodes; i++){
+            //   var node = self.nodes[i],
+            //       nodeExists = document.querySelector('#'+node.id) ? true : false;
               
-              if (!nodeExists){
-                node.tag = self._createNewEl(node.name, node.type, node.id);
-                if(i>0){
-                  self._connectNodes();
-                }
-                if (node.componentName){
-                  // console.log(JSON.parse(node.componentState));
-                  var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
-                  console.log('CREATE ELEMENT');
-                  console.log(node.componentName);
+            //   if (!nodeExists){
+            //     node.tag = self._createNewEl(node.name, node.type, node.id);
+            //     if(i>0){
+            //       self._connectNodes();
+            //     }
+            //     if (node.componentName){
+            //       // console.log(JSON.parse(node.componentState));
+            //       var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
+            //       console.log('CREATE ELEMENT');
+            //       console.log(node.componentName);
 
-                  node.tag.createElement(node.componentName, componentState);
-                }
-              }
-            }
+            //       node.tag.createElement(node.componentName, componentState);
+            //     }
+            //   }
+            // }
             
           
           // Otherwise use child elements to create nodes array
@@ -332,6 +333,31 @@
           // self.output = nodes;
           return nodes;
         },
+        recreateLens: function(nodesArray){
+          var self = this,
+              numNodes = nodesArray.length;
+
+            for(var i=0;i<numNodes; i++){
+              var node = nodesArray[i],
+                  nodeExists = document.querySelector('#'+node.id) ? true : false;
+              
+              if (!nodeExists){
+                node.tag = self._createNewEl(node.name, node.type, node.id);
+                if(i>0){
+                  self._connectNodes();
+                }
+                if (node.componentName){
+                  // console.log(JSON.parse(node.componentState));
+                  var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
+                  console.log('CREATE ELEMENT');
+                  console.log(node.componentName);
+
+                  node.tag.createElement(node.componentName, componentState);
+                }
+              }
+            }
+            
+        },
         getFinalResult: function(){
           var self = this;
           for (var i=0; i<self.nodes.length; i++){
@@ -362,6 +388,7 @@
           var currentState = {};
           for(var attribute in component.publish){
             if(attribute !== 'output'){
+              console.log(attribute);
               currentState[attribute] = component[attribute];
             }
           }
