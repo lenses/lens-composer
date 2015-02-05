@@ -122,7 +122,7 @@
       Polymer('th-lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
-        // uniqueCounter: 0,
+        uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
           {name: 'th-enigma', friendly: 'Enigma Data Loader', type: 'input'},
@@ -135,8 +135,6 @@
         ],
         pathToComponents: '../',
         nodes: [],
-        // nodes: [{'id':'th-lens-node-0', 'name':'th-lens-node', 'type':'input', 'componentName':'th-data-table', 'componentState': '{"input":[["Name","AVG Annual Salary",null,null,null],["Abdul-Quddus, Isa","695,000",null,null,null],["Abdullah, Husain","1,137,500",null,null,null],["Aboushi, Oday","589,750",null,null,null],[null,null,null,null,null]],"output":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"readOnly":false,"outputType":"json","firstRowIsHeader":true,"requireSelection":false,"minimal":false,"minCols":5,"minRows":5}'},
-        //         {'id':'th-lens-node-1', 'name':'th-lens-node', 'type':'visualize', 'componentName':'th-google-bar-chart', 'componentState': '{"input":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"chartData":[{"Name":"Abdul-Quddus, Isa","AVG Annual Salary":"695,000"},{"Name":"Abdullah, Husain","AVG Annual Salary":"1,137,500"},{"Name":"Aboushi, Oday","AVG Annual Salary":"589,750"}],"selectedLabel":"Name","selectedValues":["AVG Annual Salary"],"orientation":"horizontal","legend":true,"animateOnInit":true,"animateAfter":0}'}],
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
@@ -240,7 +238,6 @@
             tag: newEl,
             type: type
           }
-          
 
           self.nodes.splice(index,0,newNode); // determine correct place to insert node
           self._connectNodes();
@@ -256,7 +253,7 @@
         },
         _connectNodes: function(){
             var self = this;
-            console.log("CONNECT NODES");
+            // console.log("CONNECT NODES");
             for (var i=1; i<self.nodes.length; i++){
             (function() {
                 var source = self.nodes[i-1].tag,
@@ -265,9 +262,9 @@
                 if (source && target){
                   var observer = new PathObserver(source, 'output');     
                   observer.open(function(newValue, oldValue) {
-                     console.log(source);
-                     console.log("output changed!");
-                     console.log(newValue)
+                     // console.log(source);
+                     // console.log("output changed!");
+                     // console.log(newValue)
                      target.input = newValue;
                   });
                   target.input = source.output; 
@@ -336,7 +333,9 @@
         recreateLens: function(nodesArray){
           var self = this,
               numNodes = nodesArray.length;
+          
           self.nodes = nodesArray;
+          self.uniqueCounter = numNodes;
             for(var i=0;i<numNodes; i++){
               var node = self.nodes[i],
                   nodeExists = document.querySelector('#'+node.id) ? true : false;
@@ -388,7 +387,6 @@
           var currentState = {};
           for(var attribute in component.publish){
             if(attribute !== 'output'){
-              console.log(attribute);
               currentState[attribute] = component[attribute];
             }
           }
