@@ -147,14 +147,6 @@
             transform: self.componentList.filter(function(component){ return component.type == 'transform' }),
             visualize: self.componentList.filter(function(component){ return component.type == 'visualize' })
           };
-          
-          this.addEventListener('th-select-final-result', function(response) {
-            console.log('SELECT FINAL RESULT');
-            // console.log(response);
-            // console.log(response.detail.component);
-            // console.log(self.nodes);
-            self.selectFinalResult(response.detail);
-          }.bind(this));
 
           self._setupNodes();
 
@@ -304,7 +296,7 @@
           }   
 
         },
-        selectFinalResult: function(response){
+        deselectFinalResultAll: function(){
           var self= this;
 
           for(i=0;i<self.nodes.length;i++){
@@ -402,10 +394,6 @@
           }
           return JSON.stringify(currentState);
 
-        },
-        nodesChanged: function(){
-          // console.log("setup nodes");
-          // this._setupNodes();
         }
 
       });
