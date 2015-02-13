@@ -267,6 +267,7 @@
             
           }
         },
+
         generateUniqueId: function(elName){
           var self = this;
           
@@ -303,9 +304,22 @@
             self.nodes[i].tag.finalResult = false;    
           }
         },
+        _selectDefaultFinalResult: function(){
+          var self = this;
+          var finalResult = self.nodes.filter(function(item){ return item.tag.finalResult });
+          if (!finalResult.length){
+            var visualNodes = self.nodes.filter(function(item){ return item.type == "visualize"});  
+            if (visualNodes.length){
+              visualNodes[visualNodes.length - 1].tag.finalResult = true;
+              visualNodes[visualNodes.length - 1].finalResult = true;
+            }
+            
+          }
+        },
         saveLens: function(){
           var self = this;
-          
+          self._selectDefaultFinalResult();
+
           var nodes = self.nodes.map(function(node){
             var newNode = {};
             var keys = Object.keys(node);
@@ -320,16 +334,23 @@
             
             return newNode;
           })
-          console.log(nodes);
-          // self.output = nodes;
+
           return nodes;
         },
+
         recreateLens: function(nodesArray){
           var self = this,
               numNodes = nodesArray.length;
           
           self.nodes = nodesArray;
-          self.uniqueCounter = numNodes;
+          
+          // Set the counter to 1 higher than the highest count of existing node ids
+          self.uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
+            var splitId = item.id.split('-'); 
+            var num = parseInt(splitId[splitId.length-1])+1; 
+            return num; 
+          }));
+
             for(var i=0;i<numNodes; i++){
               var node = self.nodes[i],
                   nodeExists = document.querySelector('#'+node.id) ? true : false;
