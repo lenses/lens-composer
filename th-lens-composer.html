@@ -163,7 +163,7 @@
             //       nodeExists = document.querySelector('#'+node.id) ? true : false;
               
             //   if (!nodeExists){
-            //     node.tag = self._createNewEl(node.name, node.type, node.id);
+            //     node.tag = self._createNewNode(node.name, node.type, node.id);
             //     if(i>0){
             //       self._connectNodes();
             //     }
@@ -206,14 +206,14 @@
           
          
         },
-        _createNewEl: function(name, type, id){
+        _createNewNode: function(name, type, id, finalResult){
           var self = this;
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.pathToComponents = self.pathToComponents;
+          newEl.finalResult = finalResult;
           
-          // console.log(newEl);
           self.appendChild(newEl);
           return newEl;
         },
@@ -221,7 +221,7 @@
           console.log("add node");
           var self = this,
               type = selection.dataset.nodeType,
-              newEl = self._createNewEl('th-lens-node', type);
+              newEl = self._createNewNode('th-lens-node', type);
           
           var index = selection.dataset.index;
           var newNode = { 
@@ -312,6 +312,8 @@
             keys.forEach(function(key) {
                newNode[key] = node[key];
             });
+
+            newNode.finalResult = node.tag.finalResult;
             
             self._addComponentInfoToNode(newNode);
             self._removeHTMLfromNode(newNode);
@@ -333,7 +335,7 @@
                   nodeExists = document.querySelector('#'+node.id) ? true : false;
               
               if (!nodeExists){
-                node.tag = self._createNewEl(node.name, node.type, node.id);
+                node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
                 if(i>0){
                   self._connectNodes();
                 }
