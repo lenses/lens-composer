@@ -6,7 +6,7 @@
 <link rel="import" href="../core-icons/editor-icons.html">
 <link rel="import" href="../paper-input/paper-input.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor pathToComponents nodes">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -133,7 +133,6 @@
           {name:'th-google-map', friendly: 'Google Map', type: 'visualize'},
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
-        pathToComponents: '../',
         nodes: [],
         ready: function(){
           var self = this;
@@ -211,7 +210,6 @@
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
-          newEl.pathToComponents = self.pathToComponents;
           newEl.finalResult = finalResult;
           
           self.appendChild(newEl);
