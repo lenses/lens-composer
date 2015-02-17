@@ -137,8 +137,6 @@
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
-          console.log(self.nodes);
-          // console.log(JSON.parse(self.nodes));
           self.uniqueCounter = self.nodes.length;
 
           self.componentMenu = {
@@ -314,7 +312,7 @@
             
           }
         },
-        saveLens: function(){
+        getState: function(){
           var self = this;
           self._selectDefaultFinalResult();
 
@@ -333,7 +331,7 @@
             return newNode;
           })
 
-          return nodes;
+          return JSON.stringify(nodes);
         },
 
         recreateLens: function(nodesArray){
@@ -359,11 +357,7 @@
                   self._connectNodes();
                 }
                 if (node.componentName){
-                  // console.log(JSON.parse(node.componentState));
-                  var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
-                  console.log('CREATE ELEMENT');
-                  console.log(node.componentName);
-
+                  var componentState = node.componentState ? node.componentState : null; 
                   node.tag.createElementFromSavedData(node.componentName, componentState);
                 }
               }
@@ -377,9 +371,11 @@
             if (node.finalResult){
               var componentState = self._getComponentState(node.component),
                   componentName = node.component.tagName.toLowerCase();
-              return {  'componentName': componentName,
+              var finalResult = {  
+                        'componentName': componentName,
                         'componentState': componentState
-                      }
+                      };
+              return JSON.stringify(finalResult);
             }
           }
 
@@ -403,7 +399,7 @@
               currentState[attribute] = component[attribute];
             }
           }
-          return JSON.stringify(currentState);
+          return currentState;
 
         },
         _getComponentStateMinimal: function(component){
@@ -413,7 +409,7 @@
               currentState[attribute] = component[attribute];
             }
           }
-          return JSON.stringify(currentState);
+          return currentState;
 
         }
 
