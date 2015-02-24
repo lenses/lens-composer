@@ -353,12 +353,15 @@
               
               if (!nodeExists){
                 node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
+                
                 if(i>0){
                   self._connectNodes();
                 }
                 if (node.componentName){
-                  var componentState = node.componentState ? node.componentState : null; 
+                  var componentState = node.componentState ? node.componentState : null;
+
                   node.tag.createElementFromSavedData(node.componentName, componentState);
+                  node.tag.componentOptions = node.componentOptions;
                 }
               }
             }
@@ -386,6 +389,7 @@
           if(node.tag.component){
             node.componentName = node.tag.component.tagName.toLowerCase();
             node.componentState = node.tag.type === "input" ? self._getComponentState(node.tag.component) : self._getComponentStateMinimal(node.tag.component);
+            node.componentOptions = node.tag.componentOptions;
           }
         },
         _removeHTMLfromNode: function(node){
