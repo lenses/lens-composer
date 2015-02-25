@@ -361,7 +361,7 @@
                   var componentState = node.componentState ? node.componentState : null;
 
                   node.tag.createElementFromSavedData(node.componentName, componentState);
-                  node.tag.componentOptions = node.componentOptions;
+                  
                 }
               }
             }
@@ -389,7 +389,6 @@
           if(node.tag.component){
             node.componentName = node.tag.component.tagName.toLowerCase();
             node.componentState = node.tag.type === "input" ? self._getComponentState(node.tag.component) : self._getComponentStateMinimal(node.tag.component);
-            node.componentOptions = node.tag.componentOptions;
           }
         },
         _removeHTMLfromNode: function(node){
