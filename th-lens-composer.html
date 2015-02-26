@@ -82,12 +82,43 @@
         width: auto;
       }
 
+      core-selector {
+        margin: 0 auto;
+        position: relative;
+        min-height: 10px;
+        max-height: 100px;
+        overflow-y: scroll; 
+        display: inline-block;
+        border: 1px solid #EEE;
+        cursor: pointer;
+        background-color: white;
+      }
+
+      core-selector div {
+
+        padding: 1px;
+        display: block;
+        margin: 0 3px;
+        padding: 1px;
+      }
+
+      core-selector div:hover {
+        background-color: #eee;
+      }
+
+      core-selector .core-selected {
+        background-color: #ccc;
+      }
 
     </style>
 
     <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
     <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
-
+    <core-selector on-core-select="{{updateTheme}}" valueAttr="label">
+      <template repeat="{{theme in themes}}" >
+          <div label="{{theme}}">{{theme}}</div>
+      </template>
+    </core-selector>
     <!-- Handles server side communication --> 
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
@@ -96,8 +127,8 @@
     <!-- <th-component-list></th-component-list> -->
 
     <!-- Nodes -->
+
     <div id="nodeContainer">
-      
       <template repeat="{{node, index in nodes}}">
 
         <div class="node-container">
@@ -137,6 +168,7 @@
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
+          self.themes = Object.keys(window.Themes);
           self.uniqueCounter = self.nodes.length;
 
           self.componentMenu = {
@@ -411,6 +443,10 @@
           }
           return currentState;
 
+        },
+        updateTheme: function(e, detail, selection){
+          window.CoreStyle.g.theme = window.Themes[selection.selected]
+          this.fire("th-theme-changed");
         }
 
       });
