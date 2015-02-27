@@ -205,8 +205,9 @@
 
         },
         updateTheme: function(){
-          window.CoreStyle.g.theme = Themes[this.theme];
-          this.fire("th-theme-changed");
+          window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
+
+          this.fire("th-theme-changed", this.theme);
         },
         _setupNodes: function(){
           var self = this,
