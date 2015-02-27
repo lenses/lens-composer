@@ -5,8 +5,10 @@
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -82,12 +84,60 @@
         width: auto;
       }
 
+      core-selector {
+        margin: 0 auto;
+        position: relative;
+        min-height: 10px;
+        max-height: 200px;
+        overflow-y: scroll; 
+        display: inline-block;
+        border: 1px solid #EEE;
+        cursor: pointer;
+        background-color: white;
+      }
+
+      core-selector div {
+
+        padding: 1px;
+        display: block;
+        margin: 0 3px;
+        padding: 1px;
+      }
+
+      core-selector div:hover {
+        background-color: #eee;
+      }
+
+      core-selector .core-selected {
+        background-color: #ccc;
+      }
+
+      .theme-selector {
+        margin: 0 auto;
+        width: 150px;
+        text-align: center;
+      }
+
+      .theme-selector > * {
+        margin: 0 auto;
+        text-align: left;
+      }
 
     </style>
 
     <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
     <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
-
+    <div class="theme-selector">
+      <paper-dropdown-menu  label="Choose a theme" >
+        <paper-dropdown class="dropdown">
+          <core-selector selected="{{theme}}" valueAttr="label">
+            <template repeat="{{theme in themes}}" >
+                <div label="{{theme}}">{{theme}}</div>
+            </template>
+          </core-selector>
+        </paper-dropdown>
+      </paper-dropdown-menu>
+    </div>
     <!-- Handles server side communication --> 
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
@@ -96,8 +146,8 @@
     <!-- <th-component-list></th-component-list> -->
 
     <!-- Nodes -->
+
     <div id="nodeContainer">
-      
       <template repeat="{{node, index in nodes}}">
 
         <div class="node-container">
@@ -122,6 +172,7 @@
       Polymer('th-lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
+        theme: 'lenses',
         uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
@@ -134,9 +185,14 @@
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
         nodes: [],
+        observe: {
+          theme: "updateTheme"
+        },
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
+          self.themes = Object.keys(window.Themes);
+
           self.uniqueCounter = self.nodes.length;
 
           self.componentMenu = {
@@ -147,6 +203,11 @@
 
           self._setupNodes();
 
+        },
+        updateTheme: function(){
+          window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
+
+          this.fire("th-theme-changed", this.theme);
         },
         _setupNodes: function(){
           var self = this,
