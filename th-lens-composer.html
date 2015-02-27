@@ -8,7 +8,7 @@
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes">
+<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -130,7 +130,7 @@
     <div class="theme-selector">
       <paper-dropdown-menu  label="Choose a theme" >
         <paper-dropdown class="dropdown">
-          <core-selector on-core-select="{{updateTheme}}" valueAttr="label">
+          <core-selector selected="{{theme}}" valueAttr="label">
             <template repeat="{{theme in themes}}" >
                 <div label="{{theme}}">{{theme}}</div>
             </template>
@@ -172,6 +172,7 @@
       Polymer('th-lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
+        theme: 'lenses',
         uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
@@ -184,10 +185,14 @@
           {name:'th-n-bar-chart', friendly: 'Bar Chart', type: 'visualize'}
         ],
         nodes: [],
+        observe: {
+          theme: "updateTheme"
+        },
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
           self.themes = Object.keys(window.Themes);
+
           self.uniqueCounter = self.nodes.length;
 
           self.componentMenu = {
@@ -198,6 +203,10 @@
 
           self._setupNodes();
 
+        },
+        updateTheme: function(){
+          window.CoreStyle.g.theme = Themes[this.theme];
+          this.fire("th-theme-changed");
         },
         _setupNodes: function(){
           var self = this,
@@ -462,10 +471,6 @@
           }
           return currentState;
 
-        },
-        updateTheme: function(e, detail, selection){
-          window.CoreStyle.g.theme = window.Themes[selection.selected]
-          this.fire("th-theme-changed");
         }
 
       });
