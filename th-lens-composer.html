@@ -114,30 +114,79 @@
 
       .theme-selector {
         margin: 0 auto;
-        width: 150px;
+        width: 200px;
         text-align: center;
       }
 
       .theme-selector > * {
         margin: 0 auto;
         text-align: left;
+        width: 200px;
+      }
+
+      .dropdown-item, .selected-item {
+        padding: 5px 5px 0px 5px;
+        border-bottom: 1px solid white;
+      }
+
+      .selected-item {
+        position: absolute;
+        left: 0;
+        overflow: hidden;
+        height: 21px;
+      }
+
+      .swatch {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        list-style-type: none;
+        display: inline-block;
+      }
+
+      paper-dropdown-menu /deep/ core-icon {
+        z-index: 100;
       }
 
     </style>
 
     <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
     <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
+    
+    <!-- THEME SELECTOR -->
     <div class="theme-selector">
-      <paper-dropdown-menu  label="Choose a theme" >
+      <paper-dropdown-menu  label="Choose a theme">
+        <template  if="{{theme}}">
+            <div class="selected-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
+               <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
+               <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
+            </div>
+        </template>
         <paper-dropdown class="dropdown">
           <core-selector selected="{{theme}}" valueAttr="label">
-            <template repeat="{{theme in themes}}" >
-                <div label="{{theme}}">{{theme}}</div>
+            <template repeat="{{theme in themeNames}}" >
+                <div class="dropdown-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
+                 <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
+                 <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
+                </div>
             </template>
           </core-selector>
         </paper-dropdown>
       </paper-dropdown-menu>
     </div>
+
     <!-- Handles server side communication --> 
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
@@ -172,7 +221,7 @@
       Polymer('th-lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
-        theme: 'lenses',
+        // theme: 'lenses',
         uniqueCounter: 0,
         componentList: [
           {name:'th-csv', friendly: 'CSV Loader', type: 'input'},
@@ -191,7 +240,9 @@
         ready: function(){
           var self = this;
           self.fire('th-lens-composer-ready', self)
-          self.themes = Object.keys(window.Themes);
+          self.themes = window.Themes;
+          self.themeNames = Object.keys(self.themes);
+          
 
           self.uniqueCounter = self.nodes.length;
 
