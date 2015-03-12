@@ -1,6 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../th-theme/th-theme.html">
-<link rel="import" href="../th-lens-node/th-lens-node.html">
+<link rel="import" href="../lens-node/lens-node.html">
 <link rel="import" href="../core-ajax/core-ajax.html">
 <link rel="import" href="../core-icons/image-icons.html">
 <link rel="import" href="../core-icons/editor-icons.html">
@@ -8,7 +8,7 @@
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
-<polymer-element name="th-lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
+<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
   <core-style ref="theme"></theme>
   <template>
     <style>
@@ -218,7 +218,7 @@
 
   <script>
 
-      Polymer('th-lens-composer', {
+      Polymer('lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
         // theme: 'lenses',
@@ -239,7 +239,7 @@
         },
         ready: function(){
           var self = this;
-          self.fire('th-lens-composer-ready', self)
+          self.fire('lens-composer-ready', self)
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
           
@@ -290,7 +290,7 @@
           
           // Otherwise use child elements to create nodes array
           } else { 
-            var elements = self.querySelectorAll('th-lens-node'); 
+            var elements = self.querySelectorAll('lens-node'); 
             [].forEach.call(elements, function(el, i) {
                 var elName = el.tagName.toLowerCase();
 
@@ -302,7 +302,7 @@
                   self.nodes.push(
                     { tag: el, // DOM element
                       id: el.id, // unique ID
-                      name: elName, // th-lens-node
+                      name: elName, // lens-node
                       type: el.type
 
                     }
@@ -329,11 +329,11 @@
           console.log("add node");
           var self = this,
               type = selection.dataset.nodeType,
-              newEl = self._createNewNode('th-lens-node', type);
+              newEl = self._createNewNode('lens-node', type);
           
           var index = selection.dataset.index;
           var newNode = { 
-            name: 'th-lens-node',
+            name: 'lens-node',
             id: newEl.id,
             tag: newEl,
             type: type

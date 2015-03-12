@@ -1,14 +1,15 @@
 {
-  "name": "th-lens-composer",
+  "name": "lens-composer",
   "version": "0.0.0",
   "keywords": "seed, polymer, web-components",
-  "main": "th-lens-composer.html",
+  "main": "lens-composer.html",
   "dependencies": {
     "polymer": "Polymer/polymer#~0.5.1",
-    "th-lens-node": "lenses/th-lens-node",
-    "lenses-input-elements": "lenses/lenses-input-elements",
-    "lenses-transform-elements": "lenses/lenses-transform-elements",
-    "lenses-visual-elements": "lenses/lenses-visual-elements",
+    "th-theme": "thelmanews/th-theme",
+    "lens-node": "lenses/lens-node",
+    "lens-input-elements": "lenses/lens-input-elements",
+    "lens-transform-elements": "lenses/lens-transform-elements",
+    "lens-visual-elements": "lenses/lens-visual-elements",
     "paper-input": "polymer/paper-input#~0.5.4",
     "paper-dropdown-menu": "polymer/paper-dropdown-menu#master"
   }
