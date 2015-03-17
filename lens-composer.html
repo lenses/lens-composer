@@ -236,12 +236,6 @@
 
           self.uniqueCounter = self.nodes.length;
 
-          self.componentMenu = {
-            input: self.componentList.filter(function(component){ return component.type == 'input' }),
-            transform: self.componentList.filter(function(component){ return component.type == 'transform' }),
-            visualize: self.componentList.filter(function(component){ return component.type == 'visualize' })
-          };
-
           self._setupNodes();
 
         },
