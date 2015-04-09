@@ -501,7 +501,7 @@
         _getComponentStateMinimal: function(component){
           var currentState = {};
           for(var attribute in component.publish){
-            if(attribute !=='input' || attribute !== 'output'){
+            if(attribute !=='input' && attribute !=='chartData' && attribute !== 'output'){
               currentState[attribute] = component[attribute];
             }
           }
