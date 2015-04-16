@@ -1,6 +1,7 @@
 <link rel="import" href="../polymer/polymer.html"> 
 <link rel="import" href="../lens-node/lens-node.html">
 <link rel="import" href="../lenses-component-list/lenses-component-list.html">
+<link rel="import" href="../lens-tracker/lens-tracker.html">
 <link rel="import" href="../core-animated-pages/core-animated-pages.html">
 <link rel="import" href="../core-animated-pages/transitions/slide-from-right.html">
 
@@ -9,7 +10,10 @@
   <template>
     <link rel="stylesheet" href="lens-composer.css">
     
-    <div id="tracker"></div>
+    <div id="tracker">
+      <!-- <lens-tracker trackerData="{{nodes}}"></lens-tracker> -->
+    </div>
+    
     <div id="component-list">
       <template repeat="{{component in componentList}}">
         <core-item class="{{component.name}}" on-click="{{_addNodeWithElement}}" label="{{component.friendly}}" data-type="{{component.type}}"></core-item>
@@ -222,9 +226,13 @@
             type = selection.dataset.type;
 
         var node = self._addNode(e, detail, selection);
+        // console.log(node);
+        // console.log(node.components);
+        // console.log(selection)
         node.tag.addElement(e, detail, selection);
+
         self.moveRight();
-        console.log(node);// add element to node
+        // console.log(node);// add element to node
 
       },
       _addElementToNode: function(e, detail, selection){

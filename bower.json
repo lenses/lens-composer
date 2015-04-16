@@ -10,6 +10,7 @@
     "lens-input-elements": "lenses/lens-input-elements",
     "lens-transform-elements": "lenses/lens-transform-elements",
     "lens-visual-elements": "lenses/lens-visual-elements",
+    "lens-tracker": "lenses/lens-tracker",
     "paper-input": "polymer/paper-input#~0.5.4",
     "paper-dropdown-menu": "polymer/paper-dropdown-menu#master"
   },
