@@ -1,515 +1,279 @@
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../th-theme/th-theme.html">
+<link rel="import" href="../polymer/polymer.html"> 
 <link rel="import" href="../lens-node/lens-node.html">
-<link rel="import" href="../core-ajax/core-ajax.html">
-<link rel="import" href="../core-icons/image-icons.html">
-<link rel="import" href="../core-icons/editor-icons.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../lenses-component-list/lenses-component-list.html">
+<link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../core-animated-pages/transitions/slide-from-right.html">
+
 
 <polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
-  <core-style ref="theme"></theme>
   <template>
-    <style>
-
-      h1, h3 {
-        text-align: center;
-      }
-
-      .add-button {
-        width: 36px;
-        height: 36px;
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-        background-color: #eee;
-        border-radius: 50%;
-        padding: 5px;
-        margin-top: 3px;
-      }
-
-      .add-button /deep/ [fit] { /* selects icon svg */
-        padding: 10px;
-        box-sizing: border-box;
-      }
-
-      .icon {
-        display: inline-block;
-        margin: 0 8px;
-      }
-
-      .small {
-        -webkit-margin-before: 0;
-        -webkit-margin-after: 0;
-        margin: 0;
-        font-size: 0.7em;
-      }
-
-      .add-options {
-        margin: 50px auto;
-        text-align: center;
-      }
-
-      .node-container {
-        position: relative;
-        width: 80%;
-        margin: 20px auto;
-      }
-
-      .delete-button {
-        position: absolute;
-        right: 3px;
-        top: 3px;
-        cursor: pointer;
-        width: 20px;
-        z-index: 1;
-        color: white;
-      }
-
-      ::content > * {
-        width: 100%;
-        height: 100%;
-      }
-
-      .disable {
-        opacity: 0.5
-      }
-
-      paper-input /deep/ ::content * {
-        text-align: center;
-      }
-
-      paper-input {
-        width: auto;
-      }
-
-      core-selector {
-        margin: 0 auto;
-        position: relative;
-        min-height: 10px;
-        max-height: 200px;
-        overflow-y: scroll; 
-        display: inline-block;
-        border: 1px solid #EEE;
-        cursor: pointer;
-        background-color: white;
-      }
-
-      core-selector div {
-
-        padding: 1px;
-        display: block;
-        margin: 0 3px;
-        padding: 1px;
-      }
-
-      core-selector div:hover {
-        background-color: #eee;
-      }
-
-      core-selector .core-selected {
-        background-color: #ccc;
-      }
-
-      .theme-selector {
-        margin: 0 auto;
-        width: 200px;
-        text-align: center;
-      }
-
-      .theme-selector > * {
-        margin: 0 auto;
-        text-align: left;
-        width: 200px;
-      }
-
-      .dropdown-item, .selected-item {
-        padding: 5px 5px 0px 5px;
-        border-bottom: 1px solid white;
-      }
-
-      .selected-item {
-        position: absolute;
-        left: 0;
-        overflow: hidden;
-        height: 21px;
-      }
-
-      .swatch {
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        list-style-type: none;
-        display: inline-block;
-      }
-
-      paper-dropdown-menu /deep/ core-icon {
-        z-index: 100;
-      }
-
-    </style>
-
-    <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
-    <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
+    <link rel="stylesheet" href="lens-composer.css">
     
-    <!-- THEME SELECTOR -->
-    <div class="theme-selector">
-      <paper-dropdown-menu  label="Choose a theme">
-        <template  if="{{theme}}">
-            <div class="selected-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
-               <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
-            </div>
-        </template>
-        <paper-dropdown class="dropdown">
-          <core-selector selected="{{theme}}" valueAttr="label">
-            <template repeat="{{theme in themeNames}}" >
-                <div class="dropdown-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
-                 <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
-                </div>
-            </template>
-          </core-selector>
-        </paper-dropdown>
-      </paper-dropdown-menu>
-    </div>
-
-    <!-- Handles server side communication --> 
-    <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
-      <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
-
-    <!-- Menu of components? --> 
-    <!-- <th-component-list></th-component-list> -->
-
-    <!-- Nodes -->
-
-    <div id="nodeContainer">
-      <template repeat="{{node, index in nodes}}">
-
-        <div class="node-container">
-          <template if="{{index > 0}}">
-            <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
-          </template>
-          <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
-        </div>
-        
-        <div class="add-options">
-          <div class="icon"><p class="small disable">Add data</p><core-icon class="add-button disable" data-node-type="input" icon="image:grid-on" data-index="{{index+1}}" on-click="{{}}"></core-icon></div>
-          <div class="icon"><p class="small">Transform</p><core-icon class="add-button" data-node-type="transform" icon="settings-input-component" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-          <div class="icon"><p class="small">Add chart</p><core-icon class="add-button" data-node-type="visualize" icon="editor:insert-chart" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-        </div>
+    <div id="tracker"></div>
+    <div id="component-list">
+      <template repeat="{{component in componentList}}">
+        <core-item class="{{component.name}}" on-click="{{_addNodeWithElement}}" label="{{component.friendly}}" data-type="{{component.type}}"></core-item>
       </template>
     </div>
+    <!-- <lenses-component-list></lenses-component-list> -->
+    
+    <div id="nodes">
+      <core-animated-pages transitions="slide-from-right"  selected="{{currentNode}}" notap>
+      <template repeat="{{node, index in nodes}}">
+        
+        <div class="node" slide-from-right>
+          <template if="{{index > 0}}">
+            <div class="arrow-left"  on-tap="{{ moveLeft }}"><</div>
+          </template>
+          <content select="#{{node.id}}"></content>
+          <template if="{{index < nodes.length-1}}">
+            <div class="arrow-right"  on-tap="{{ moveRight }}">></div>    
+          </template>
+        </div>
 
+      </template>
+      
+      </core-animated-pages>
+    </div>
   </template>
-
   <script>
-
-      Polymer('lens-composer', {
-        // lensTitle: 'Example Lens',
-        // lensAuthor: 'Nisha Batra',
-        // theme: 'lenses',
-        uniqueCounter: 0,
-        nodes: [],
-        observe: {
-          theme: "updateTheme"
-        },
-        ready: function(){
-          var self = this;
-          self.fire('lens-composer-ready', self)
-          self.themes = window.Themes;
-          self.themeNames = Object.keys(self.themes);
+  // TODO: 
+  // - incorporate themes
+  // - handle selection of final result
+  // - incorporate lens-tracker and component-list
+  // - 
+    Polymer({
+      nodes: [],
+      componentList: [
+          // {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+          {name: 'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
+          {name: 'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
           
+          {name:'lens-data-convert-date', friendly: 'Convert Dates', type: 'transform'},
+          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
+          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
+          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
+          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
+          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
+          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
+          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
+          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
 
-          self.uniqueCounter = self.nodes.length;
+          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
+          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
+          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
+          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
+          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'},
+          {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+      ],
+      _uniqueIdCounter: 0,
+      ready: function(){
+        var self = this;
+        self.fire('lens-composer-ready', self);
+        
+        self._uniqueIdCounter = self.nodes ? self.nodes.length : 0;
 
-          self._setupNodes();
+        // self._componentMenu = {
+        //   input: self.componentList.filter(function(component){ return component.type == 'input' }),
+        //   transform: self.componentList.filter(function(component){ return component.type == 'transform' }),
+        //   visualize: self.componentList.filter(function(component){ return component.type == 'visualize' })
+        // };
 
-        },
-        updateTheme: function(){
-          window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
+        self._setupNodes();
 
-          this.fire("th-theme-changed", this.theme);
-        },
-        _setupNodes: function(){
-          var self = this,
-              boringTags = ['div','ul','li','span','th-editor','br'],
-              numNodes = self.nodes.length;
+      },
+      recreateLens: function(){
 
-          // If nodes array is given, recreate elements
-          if (numNodes > 0){
-            // for(var i=0;i<numNodes; i++){
-            //   var node = self.nodes[i],
-            //       nodeExists = document.querySelector('#'+node.id) ? true : false;
-              
-            //   if (!nodeExists){
-            //     node.tag = self._createNewNode(node.name, node.type, node.id);
-            //     if(i>0){
-            //       self._connectNodes();
-            //     }
-            //     if (node.componentName){
-            //       // console.log(JSON.parse(node.componentState));
-            //       var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
-            //       console.log('CREATE ELEMENT');
-            //       console.log(node.componentName);
+      },
+      saveLens: function(){
 
-            //       node.tag.createElement(node.componentName, componentState);
-            //     }
-            //   }
-            // }
+      },
+
+      /***** PRIVATE METHODS *****/
+
+      _setupNodes: function(){
+        var self = this,
+            elements = self.querySelectorAll('lens-node'); 
+
+          // If nodes array is given, recreate lens
+          if (self.nodes && self.nodes.length){
             
-          
+            // Remove potential child elements if they exist to avoid conflicts
+            if (elements.length){
+              [].forEach.call(elements, function(el, i){
+                el.remove();
+              });
+            }
+
+            // Recreate lens with nodes array
+            self.recreateLens(self.nodes);
+            
           // Otherwise use child elements to create nodes array
-          } else { 
-            var elements = self.querySelectorAll('lens-node'); 
+          } else if(elements.length) { 
             [].forEach.call(elements, function(el, i) {
                 var elName = el.tagName.toLowerCase();
 
                 // Set unique ID to each element
-                el.id = el.id || self.generateUniqueId(elName);
+                el.id = el.id || self._generateUniqueId(elName);
                 
-                var index=boringTags.indexOf(elName);
-                if(index<0) {
-                  self.nodes.push(
-                    { tag: el, // DOM element
-                      id: el.id, // unique ID
-                      name: elName, // lens-node
-                      type: el.type
-
-                    }
-                  );
-                }
+                self.nodes.push(
+                  { id: el.id, // unique ID
+                    tag: el, // DOM element
+                    name: elName, // 'lens-node'
+                    type: el.type,
+                    track: 0,
+                    step: i 
+                    // TODO: Add track, step, output, components, active, visible
+                  }
+                );
             });
+
             this._connectNodes();
+          
+          // Otherwise create an empty input node
+          } else {
+
+            // TODO: Create input node
           }
 
           
          
-        },
-        _createNewNode: function(name, type, id, finalResult){
+      },
+      _generateUniqueId: function(elName){
+        var self = this;
+        
+        var uniqueId = elName + '-' + self._uniqueIdCounter;
+        
+        self._uniqueIdCounter+= 1;
+
+        return uniqueId;
+      },
+      _addNode: function(e, detail, selection){
+        // console.log("add node");
+        var self = this,
+            type = selection.dataset.type,
+
+            newEl = self._createNewNode('lens-node', type);
+          
+        var index = this.currentNode + 1;
+        var newNode = { 
+          name: 'lens-node',
+          id: newEl.id,
+          tag: newEl,
+          type: type
+        }
+
+        self.nodes.splice(index,0,newNode); // determine correct place to insert node
+
+        return newNode;
+
+      },
+      _createNewNode: function(name, type, id, finalResult){
           var self = this;
           var newEl = document.createElement(name);
-          newEl.id = id || self.generateUniqueId(name);
+          newEl.id = id || self._generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.finalResult = finalResult;
           
           self.appendChild(newEl);
           return newEl;
-        },
-        _addNode: function(e, detail, selection){
-          console.log("add node");
-          var self = this,
-              type = selection.dataset.nodeType,
-              newEl = self._createNewNode('lens-node', type);
-          
-          var index = selection.dataset.index;
-          var newNode = { 
-            name: 'lens-node',
-            id: newEl.id,
-            tag: newEl,
-            type: type
-          }
+      },
+      _deleteNode: function(e, detail, selection){
+        var self = this;
+        // console.log("delete node");
+        
+        // var index = selection.dataset.index;
+        // self.removeChild(self.nodes[index].tag);
+        // self.nodes.splice(index, 1)
+        // this._connectNodes();
+      },
+      _connectNodes: function(){
+          // var self = this;
+          // // console.log("CONNECT NODES");
+          // for (var i=1; i<self.nodes.length; i++){
+          // (function() {
+          //     var source = self.nodes[i-1].tag,
+          //         target = self.nodes[i].tag;
 
-          self.nodes.splice(index,0,newNode); // determine correct place to insert node
-          self._connectNodes();
-        },
-        _deleteNode: function(e, detail, selection){
-          var self = this;
-          console.log("delete node");
-          
-          var index = selection.dataset.index;
-          self.removeChild(self.nodes[index].tag);
-          self.nodes.splice(index, 1)
-          this._connectNodes();
-        },
-        _connectNodes: function(){
-            var self = this;
-            // console.log("CONNECT NODES");
-            for (var i=1; i<self.nodes.length; i++){
-            (function() {
-                var source = self.nodes[i-1].tag,
-                    target = self.nodes[i].tag;
-
-                if (source && target){
-                  var observer = new PathObserver(source, 'output');     
-                  observer.open(function(newValue, oldValue) {
-                     // console.log(source);
-                     // console.log("output changed!");
-                     // console.log(newValue)
-                     target.input = newValue;
-                  });
-                  target.input = source.output; 
-                }
-                
-            })();
-
-            
-          }
-        },
-
-        generateUniqueId: function(elName){
-          var self = this;
-          
-          var uniqueId = elName + '-' + self.uniqueCounter;
-          
-          self.uniqueCounter+= 1;
-
-          return uniqueId;
-        },
-        toggleNodes: function(e, detail, selection){
-          var self = this;
-          
-          // Collapse all sections
-          for(var i=0;i<self.nodes.length; i++){
-            var node = self.nodes[i].tag.shadowRoot,
-                sections = node.querySelectorAll('core-collapse');
-            for (var index=0; index<sections.length; index++){
-              sections[index].opened = false;
-            }
-          }
-
-          // Expand sections of selected node
-          var currentNode = self.querySelector(selection.select).shadowRoot,
-              currentSections = currentNode.querySelectorAll('core-collapse')
-          for (var i=0; i<currentSections.length; i++){
-            currentSections[i].opened = true;
-          }   
-
-        },
-        deselectFinalResultAll: function(){
-          var self= this;
-
-          for(i=0;i<self.nodes.length;i++){
-            self.nodes[i].tag.finalResult = false;    
-          }
-        },
-        _selectDefaultFinalResult: function(){
-          var self = this;
-          var finalResult = self.nodes.filter(function(item){ return item.tag.finalResult });
-          if (!finalResult.length){
-            var visualNodes = self.nodes.filter(function(item){ return item.type == "visualize"});  
-            if (visualNodes.length){
-              visualNodes[visualNodes.length - 1].tag.finalResult = true;
-              visualNodes[visualNodes.length - 1].finalResult = true;
-            }
-            
-          }
-        },
-        getState: function(){
-          var self = this;
-          self._selectDefaultFinalResult();
-
-          var nodes = self.nodes.map(function(node){
-            var newNode = {};
-            var keys = Object.keys(node);
-            keys.forEach(function(key) {
-               newNode[key] = node[key];
-            });
-
-            newNode.finalResult = node.tag.finalResult;
-            
-            self._addComponentInfoToNode(newNode);
-            self._removeHTMLfromNode(newNode);
-            
-            return newNode;
-          })
-
-          return JSON.stringify(nodes);
-        },
-
-        recreateLens: function(nodesArray){
-          var self = this,
-              numNodes = nodesArray.length;
-          
-          self.nodes = nodesArray;
-          
-          // Set the counter to 1 higher than the highest count of existing node ids
-          self.uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
-            var splitId = item.id.split('-'); 
-            var num = parseInt(splitId[splitId.length-1])+1; 
-            return num; 
-          }));
-
-            for(var i=0;i<numNodes; i++){
-              var node = self.nodes[i],
-                  nodeExists = document.querySelector('#'+node.id) ? true : false;
+          //     if (source && target){
+          //       var observer = new PathObserver(source, 'output');     
+          //       observer.open(function(newValue, oldValue) {
+          //          // console.log(source);
+          //          // console.log("output changed!");
+          //          // console.log(newValue)
+          //          target.input = newValue;
+          //       });
+          //       target.input = source.output; 
+          //     }
               
-              if (!nodeExists){
-                node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
-                if(i>0){
-                  self._connectNodes();
-                }
-                if (node.componentName){
-                  var componentState = node.componentState ? node.componentState : null; 
-                  node.tag.createElementFromSavedData(node.componentName, componentState);
-                }
-              }
-            }
-            
-        },
-        getFinalResult: function(){
-          var self = this;
-          for (var i=0; i<self.nodes.length; i++){
-            var node =self.nodes[i].tag;
-            if (node.finalResult){
-              var componentState = self._getComponentState(node.component),
-                  componentName = node.component.tagName.toLowerCase();
-              var finalResult = {  
-                        'componentName': componentName,
-                        'componentState': componentState
-                      };
-              return JSON.stringify(finalResult);
-            }
-          }
+          // })();
 
-          return;
-        },
-        _addComponentInfoToNode: function(node){
-          var self = this;
-          if(node.tag.component){
-            node.componentName = node.tag.component.tagName.toLowerCase();
-            node.componentState = node.tag.type === "input" ? self._getComponentState(node.tag.component) : self._getComponentStateMinimal(node.tag.component);
-          }
-        },
-        _removeHTMLfromNode: function(node){
-          delete node.tag;
+          
+        // }
 
-        },
-        _getComponentState: function(component){
-          var currentState = {};
-          for(var attribute in component.publish){
-            if(attribute !== 'output'){
-              currentState[attribute] = component[attribute];
-            }
-          }
-          return currentState;
+      },
+      _addNodeWithElement: function(e, detail, selection){
+        var self = this,
+            type = selection.dataset.type;
 
-        },
-        _getComponentStateMinimal: function(component){
-          var currentState = {};
-          for(var attribute in component.publish){
-            if(attribute !=='input' && attribute !=='chartData' && attribute !== 'output'){
-              currentState[attribute] = component[attribute];
-            }
-          }
-          return currentState;
+        var node = self._addNode(e, detail, selection);
+        node.tag.addElement(e, detail, selection);
+        self.moveRight();
+        console.log(node);// add element to node
 
-        }
+      },
+      _addElementToNode: function(e, detail, selection){
+        var self = this,
+            node = self.nodes[self.currentNode].node,
+            name = selection.className,
+            directory = "../" + name + "/" + name + ".html",
+            pathToEl = this.resolvePath(directory); // construct path to component
 
-      });
+        
+        // Dynamically create HTML import for component
+        Polymer.import([pathToEl], function(){ // TODO: this path is different in the lenscomposer app -- doesnt point to bower_components directory
+          var component = {
+            name: name
+          };
+          
+          component.tag = document.createElement(name);
+          // if (node.type !=="input"){ // if the component is visual, set the input to the data selector output if avail, otherwise the table data
+            // self.component.style.height = "100%";
+            // self.component.style.width = "100%";
+            // self.component.input = self.cloneArray(self.selectedData) || self.cloneArray(self.data);
+          // } 
+            // if (self.component){
+          // self.component.animateOnInit = true;
+          // self.component.style.width = "100%";
+          // self.getFieldsFromComponent();
+          // self.component.input = self.cloneArray(self.selectedData) || self.cloneArray(self.data);
+        // }
 
+          node.appendChild(component.tag);
+          // node.componentName = selection.label
+          // self.setComponentObserver(); // observe changes to output of component
+        })
+        
+      },
+      _getComponentState: function(component){
+
+      },
+      _removeHTMLfromNode: function(node){
+        // delete node.tag;
+
+      },
+      moveRight: function () {
+        this.currentNode++;
+      },
+      moveLeft: function () {
+        this.currentNode--;
+      }
+
+    });
   </script>
 </polymer-element>
