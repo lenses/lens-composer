@@ -64,10 +64,12 @@
     <template if="{{nodes.length}}">
       <div id="nodeContainer">        
         <template repeat="{{node, index in nodes}}">
+          <div class="node">
             <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
             <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
           <div class="add-options">
             <div class="icon"><core-icon class="add-button" icon="add" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
+          </div>
           </div>
         </template>
       </div>
