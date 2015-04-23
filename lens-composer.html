@@ -13,7 +13,12 @@
   <template>
     <style>
 
-      h1, h3 {
+      h1, h3 { /* title and author */
+        text-align: center;
+      }
+
+      .add-options { /* container for add button */
+        margin: 50px auto;
         text-align: center;
       }
 
@@ -23,10 +28,11 @@
         position: relative;
         display: inline-block;
         cursor: pointer;
-        background-color: #eee;
+        background-color: #59BAFF;
         border-radius: 50%;
         padding: 5px;
         margin-top: 3px;
+        color: white;
       }
 
       .add-button /deep/ [fit] { /* selects icon svg */
@@ -39,21 +45,17 @@
         margin: 0 8px;
       }
 
-      .small {
+      .small { /* text above button add button */
         -webkit-margin-before: 0;
         -webkit-margin-after: 0;
         margin: 0;
         font-size: 0.7em;
       }
 
-      .add-options {
-        margin: 50px auto;
-        text-align: center;
-      }
 
-      .node-container {
+      #nodeContainer { /* container for all nodes */
         position: relative;
-        width: 80%;
+        width: 95%;
         margin: 20px auto;
       }
 
@@ -64,7 +66,7 @@
         cursor: pointer;
         width: 20px;
         z-index: 1;
-        color: white;
+        color: black;
       }
 
       ::content > * {
@@ -76,6 +78,7 @@
         opacity: 0.5
       }
 
+      /* Theme selector styles START */ 
       paper-input /deep/ ::content * {
         text-align: center;
       }
@@ -112,6 +115,7 @@
         background-color: #ccc;
       }
 
+      
       .theme-selector {
         margin: 0 auto;
         width: 200px;
@@ -123,6 +127,7 @@
         text-align: left;
         width: 200px;
       }
+
 
       .dropdown-item, .selected-item {
         padding: 5px 5px 0px 5px;
@@ -147,6 +152,8 @@
       paper-dropdown-menu /deep/ core-icon {
         z-index: 100;
       }
+
+      /* Theme selector styles END */ 
 
     </style>
 
@@ -191,29 +198,25 @@
     <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
       <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
 
-    <!-- Menu of components? --> 
-    <!-- <th-component-list></th-component-list> -->
+    <!-- Starting state -->
+    <template if="{{!nodes.length}}">
+      <div class="add-options">
+        <div class="icon"><core-icon class="add-button" data-node-type="input" icon="add" data-index="0" on-click="{{_addNode}}"></core-icon></div>
+      </div>
+    </template>
 
     <!-- Nodes -->
-
-    <div id="nodeContainer">
-      <template repeat="{{node, index in nodes}}">
-
-        <div class="node-container">
-          <template if="{{index > 0}}">
+    <template if="{{nodes.length}}">
+      <div id="nodeContainer">        
+        <template repeat="{{node, index in nodes}}">
             <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
-          </template>
-          <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
-        </div>
-        
-        <div class="add-options">
-          <div class="icon"><p class="small disable">Add data</p><core-icon class="add-button disable" data-node-type="input" icon="image:grid-on" data-index="{{index+1}}" on-click="{{}}"></core-icon></div>
-          <div class="icon"><p class="small">Transform</p><core-icon class="add-button" data-node-type="transform" icon="settings-input-component" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-          <div class="icon"><p class="small">Add chart</p><core-icon class="add-button" data-node-type="visualize" icon="editor:insert-chart" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-        </div>
-      </template>
-    </div>
-
+            <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
+          <div class="add-options">
+            <div class="icon"><core-icon class="add-button" icon="add" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
+          </div>
+        </template>
+      </div>
+    </template>
   </template>
 
   <script>
@@ -304,6 +307,7 @@
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
+          console.log(newEl.type)
           newEl.finalResult = finalResult;
           
           self.appendChild(newEl);
@@ -314,7 +318,7 @@
           var self = this,
               type = selection.dataset.nodeType,
               newEl = self._createNewNode('lens-node', type);
-          
+          console.log(type);
           var index = selection.dataset.index;
           var newNode = { 
             name: 'lens-node',
@@ -328,12 +332,14 @@
         },
         _deleteNode: function(e, detail, selection){
           var self = this;
-          console.log("delete node");
-          
-          var index = selection.dataset.index;
-          self.removeChild(self.nodes[index].tag);
-          self.nodes.splice(index, 1)
-          this._connectNodes();
+          if(confirm('Are you sure you want to remove this step?')) {
+            console.log("delete node");
+            
+            var index = selection.dataset.index;
+            self.removeChild(self.nodes[index].tag);
+            self.nodes.splice(index, 1)
+            this._connectNodes();
+          }
         },
         _connectNodes: function(){
             var self = this;
