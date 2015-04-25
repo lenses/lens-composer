@@ -8,21 +8,39 @@ h1, h3 { /* title and author */
 }
 
 .add-button {
-  width: 36px;
-  height: 36px;
+  width: 10px;
+  height: 10px;
   position: relative;
   display: inline-block;
   cursor: pointer;
   background-color: #4FC1FF;
   border-radius: 50%;
-  padding: 5px;
-  margin-top: 3px;
   color: white;
+  margin-top: 12.5px;
+  transition: 0.3s ease-out;
+}
+
+.add-button-start{ /* this one bi*/
+  width: 30px;
+  height: 30px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  background-color: #4FC1FF;
+  border-radius: 50%;
+  color: white;
+  margin-top: 0;
 }
 
 .add-button /deep/ [fit] { /* selects icon svg */
-  padding: 10px;
+  padding: 5px;
   box-sizing: border-box;
+}
+
+.add-button:hover {
+  width: 30px;
+  height: 30px;
+  margin-top: 0;
 }
 
 .icon {
@@ -45,7 +63,31 @@ h1, h3 { /* title and author */
 }
 
 .node {
+  margin: 0 auto;
   position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.node .description {
+  position: absolute;
+  left: 30px;
+  min-width: 300px;
+}
+
+.collapsed {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #eee;
+  cursor: pointer;
+  transition: .2s ease-out; 
+}
+
+.collapsed:hover {
+  background-color:#ddd ;
+  /*width: 30px;*/
+  /*height: 30px;*/
 }
 
 .delete-button {
@@ -144,3 +186,12 @@ paper-dropdown-menu /deep/ core-icon {
 
 /* Theme selector styles END */ 
 
+.utility-buttons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.utility-buttons button {
+  cursor: pointer;
+}
