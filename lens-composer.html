@@ -13,16 +13,12 @@
   <template>
     <link rel="stylesheet" href="lens-composer.css">
 
-    <template if="{{nodes.length}}">
-      <div class="utility-buttons">
-        <button on-click="{{collapseNodes}}"> Collapse All</button>
-        <button on-click="{{expandNodes}}"> Expand All</button>
-      </div>
-    </template>
+
+    <!-- Title and Author fields -->
     <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
     <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
     
-    <!-- THEME SELECTOR -->
+    <!-- Theme selector -->
     <div class="theme-selector">
       <paper-dropdown-menu  label="Choose a theme">
         <template  if="{{theme}}">
@@ -56,44 +52,41 @@
       </paper-dropdown-menu>
     </div>
 
-    <!-- Handles server side communication --> 
-    <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
-      <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
-    <svg class="line">
-       <path stroke="#333" fill="none"
-            d="M{{node.vpos*150}},{{node.track*50+5}} C{{node.vpos*150+45}},{{node.track*50+5}} {{node.output[0].inputNode.vpos*150-45}},{{node.output[0].inputNode.track*50+5}} {{node.output[0].inputNode.vpos*150}},{{node.output[0].inputNode.track*50+5}} ">
+    <template if="{{nodes.length}}">
+      <div class="utility-buttons">
+        <button on-click="{{_collapseNodes}}"> Collapse All</button>
+        <button on-click="{{_expandNodes}}"> Expand All</button>
+      </div>
+    </template>
 
-    </svg>
-    <!-- Starting state -->
+    <!-- Starting state with 'add' button -->
     <template if="{{!nodes.length}}">
       <div class="add-options">
-        <div class="icon"><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-index="0" on-click="{{_addNode}}"></core-icon></div>
+        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-index="0" on-click="{{_addNode}}"></core-icon></div>
       </div>
     </template>
 
     <!-- Nodes -->
     <template if="{{nodes.length}}">
-      <div id="nodeContainer" on-click="{{collapseNodes}}">        
+      <div id="nodeContainer" on-click="{{_collapseNodes}}">        
+        <div class="line"></div>
         <template repeat="{{node, index in nodes}}">
-          
-          <div class="node {{node | collapseFilter}}" data-target="collapse-node" on-click="{{expandSelected}}" data-index="{{index}}">
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
-            <core-collapse id="collapse-node" opened="{{node.opened}}"> 
+            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.5"> 
               <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
               <content select="#{{node.id}}"></content>
             </core-collapse>
           </div>
           <div class="add-options">
-            <div class="icon"><core-icon class="add-button" icon="add" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
+            <core-icon class="add-button" icon="add" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon>
           </div>
-          
         </template>
       </div>
     </template>
   </template>
-
   <script>
 
       Polymer('lens-composer', {
@@ -171,6 +164,7 @@
                   );
                 }
             });
+            console.log(self.nodes);
             this._connectNodes();
           }
 
@@ -197,6 +191,9 @@
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
           
+          // Collapse all nodes
+          self._collapseNodes();
+
           var index = selection.dataset.index;
           var newNode = { 
             name: 'lens-node',
@@ -244,66 +241,32 @@
             
           }
         },
-
-        generateUniqueId: function(elName){
-          var self = this;
-          
-          var uniqueId = elName + '-' + self.uniqueCounter;
-          
-          self.uniqueCounter+= 1;
-
-          return uniqueId;
-        },
-        toggleNodes: function(e, detail, selection){
-          var self = this;
-          
-          var nodeContainers = self.querySelectorAll('.node');
-
-          [].forEach.call(nodeContainers, function(node, i){
-            console.log(node);
-            console.log(i);
-          })
-          // Collapse all sections
-          // for(var i=0;i<self.nodes.length; i++){
-          //   // var node = self.nodes[i].tag.shadowRoot,
-          //       // sections = node.querySelectorAll('core-collapse');
-          //   // for (var index=0; index<sections.length; index++){
-          //     // sections[index].opened = false;
-          //   // }
-          // }
-
-          // Expand sections of selected node
-          // var currentNode = self.querySelector(selection.select).shadowRoot,
-          //     currentSections = currentNode.querySelectorAll('core-collapse')
-          // for (var i=0; i<currentSections.length; i++){
-          //   currentSections[i].opened = true;
-          // }   
-
-        },
-        // collapseSelected: function(e, detail, selection){
-        //   var self = this;
-        //   var target = selection.dataset.target;        
-        //   // fade out node
-        //   // shrink the circle
-        //   // collapse the node
-          
-        //   selection.classList.add('collapsed');
-        //   self.shadowRoot.querySelector('#'+target).toggle();
-        // },
-        expandSelected: function(e, detail, selection){
+        _expandSelected: function(e, detail, selection){
           var self = this;
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
 
           // Collapse all nodes
-          self.collapseNodes();
+          self._collapseNodes();
 
           // Expand core-collapse and div
           self.nodes[selection.dataset.index].opened = true;
           selection.classList.remove('collapsed');
           
         },
-        collapseNodes: function(e){
+        _expandNodes: function(e){
+          var self = this;
+          var nodeContainers = self.shadowRoot.querySelectorAll('.node');
+  
+          self.nodes.forEach(function(node,i){
+            node.opened = true;
+          });
+
+          [].forEach.call(nodeContainers, function(node, i){
+            node.classList.remove('collapsed');
+          })
+        },
+        _collapseNodes: function(e){
           var self = this;
           var nodeContainers = self.shadowRoot.querySelectorAll('.node');
   
@@ -314,6 +277,16 @@
           [].forEach.call(nodeContainers, function(node, i){
             node.classList.add('collapsed');
           })
+        },
+
+        generateUniqueId: function(elName){
+          var self = this;
+          
+          var uniqueId = elName + '-' + self.uniqueCounter;
+          
+          self.uniqueCounter+= 1;
+
+          return uniqueId;
         },
         deselectFinalResultAll: function(){
           var self= this;
