@@ -61,6 +61,7 @@
 
     <!-- Starting state with 'add' button -->
     <template if="{{!nodes.length}}">
+      
       <div class="add-options">
         <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-index="0" on-click="{{_addNode}}"></core-icon></div>
       </div>
@@ -98,6 +99,33 @@
         observe: {
           theme: "updateTheme"
         },
+        componentList: [
+          {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+          {name: 'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
+          {name: 'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          
+          {name:'lens-data-convert-date', friendly: 'Convert Dates', type: 'transform'},
+          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
+          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
+          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
+          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
+          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
+          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
+          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
+          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
+
+          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
+          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
+          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
+          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
+          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'},
+          {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+      ],
         ready: function(){
           var self = this;
           self.fire('lens-composer-ready', self)
@@ -176,8 +204,16 @@
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
-          console.log(newEl.type)
           newEl.finalResult = finalResult;
+          newEl.componentList = self.componentList.filter(function(component){
+            if (type =='input'){
+              if (component.type =='input'){
+                return true;
+              }
+            } else {
+              return true;
+            }
+          })
           
           self.appendChild(newEl);
           return newEl;
