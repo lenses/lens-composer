@@ -76,7 +76,7 @@
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
-            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.5"> 
+            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6"> 
               <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
               <content select="#{{node.id}}"></content>
             </core-collapse>
@@ -101,11 +101,11 @@
         },
         componentList: [
           {name:'lens-data-table', friendly: 'Data table', type: 'input'},
-          {name: 'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
           {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
-          {name: 'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          {name:'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
           
-          {name:'lens-data-convert-date', friendly: 'Convert Dates', type: 'transform'},
+          {name:'lens-data-convert-date', friendly: 'Convert Date Formats', type: 'transform'},
           {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
           {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
           {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
@@ -121,10 +121,10 @@
           {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
           {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
           {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
-          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'},
-          {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
-          {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
-          {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'}
+          // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
       ],
         ready: function(){
           var self = this;
@@ -194,10 +194,7 @@
             });
             console.log(self.nodes);
             this._connectNodes();
-          }
-
-          
-         
+          }         
         },
         _createNewNode: function(name, type, id, finalResult){
           var self = this;
@@ -214,7 +211,6 @@
               return true;
             }
           })
-          
           self.appendChild(newEl);
           return newEl;
         },

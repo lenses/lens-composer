@@ -108,7 +108,7 @@ paper-dropdown-menu /deep/ core-icon {
 /*** Line and node styles START ***/
 #nodeContainer { /* container for all nodes */
   position: relative;
-  width: 95%;
+  width: 100%;
   margin: 40px auto;
 }
 
@@ -204,7 +204,7 @@ paper-dropdown-menu /deep/ core-icon {
   border-radius: 50%;
   background-color: #eee;
   cursor: pointer;
-  transition: .3s ease-out; 
+  transition: 0.5s ease-in-out; 
 }
 
 .collapsed:hover {
