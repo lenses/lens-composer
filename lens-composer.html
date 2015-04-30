@@ -56,6 +56,7 @@
       <div class="utility-buttons">
         <button on-click="{{_collapseNodes}}"> Collapse All</button>
         <button on-click="{{_expandNodes}}"> Expand All</button>
+        <button on-click="{{_addTrack}}" data-node-type="input" data-index="{{nodes.length}}"> Add New Track</button>
       </div>
     </template>
 
@@ -63,16 +64,17 @@
     <template if="{{!nodes.length}}">
       
       <div class="add-options">
-        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-index="0" on-click="{{_addNode}}"></core-icon></div>
+        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addNode}}"></core-icon></div>
       </div>
     </template>
 
     <!-- Nodes -->
     <template if="{{nodes.length}}">
       <div id="nodeContainer" on-click="{{_collapseNodes}}">        
+        
         <div class="line"></div>
         <template repeat="{{node, index in nodes}}">
-          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
@@ -81,11 +83,18 @@
               <content select="#{{node.id}}"></content>
             </core-collapse>
           </div>
-          <div class="add-options">
-            <core-icon class="add-button" icon="add" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon>
+          <div class="add-options track{{node.track}}">
+            
+            <core-icon class="add-button " icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
+            
           </div>
+         
+
+
         </template>
+
       </div>
+      
     </template>
   </template>
   <script>
@@ -95,6 +104,7 @@
         // lensAuthor: 'Nisha Batra',
         // theme: 'lenses',
         uniqueCounter: 0,
+        numTracks: 0,
         nodes: [],
         observe: {
           theme: "updateTheme"
@@ -114,6 +124,8 @@
           {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
           {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
           {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
+
+          {name:'lens-data-join', friendly: 'Join Tracks', type: 'join'},
 
           {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
           {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
@@ -208,6 +220,9 @@
                 return true;
               }
             } else {
+              if (component.type =='input'){
+                return false;
+              }
               return true;
             }
           })
@@ -218,21 +233,35 @@
           console.log("add node");
           var self = this,
               type = selection.dataset.nodeType,
+              track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
-          
+
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
           
+          track = track >= 0 ? track : self.numTracks;
           // Collapse all nodes
           self._collapseNodes();
 
           var index = selection.dataset.index;
+          if (parseInt(index) == 0){
+            // self.numTracks++;
+          }
+
+               console.log("**");
+     console.log(track);
+     console.log(index)
+     console.log("numTracks: " + self.numTracks);
+          // console.log(track);
+          // console.log(index);
+          // console.log("numTracks: " + self.numTracks);
           var newNode = { 
             name: 'lens-node',
             id: newEl.id,
             tag: newEl,
             type: type,
-            opened: true
+            opened: true,
+            track: track
           }
 
           self.nodes.splice(index,0,newNode); // determine correct place to insert node
@@ -251,26 +280,40 @@
         },
         _connectNodes: function(){
             var self = this;
-            // console.log("CONNECT NODES");
-            for (var i=1; i<self.nodes.length; i++){
-            (function() {
-                var source = self.nodes[i-1].tag,
-                    target = self.nodes[i].tag;
-
-                if (source && target){
-                  var observer = new PathObserver(source, 'output');     
-                  observer.open(function(newValue, oldValue) {
-                     // console.log(source);
-                     // console.log("output changed!");
-                     // console.log(newValue)
-                     target.input = newValue;
-                  });
-                  target.input = source.output; 
-                }
-                
-            })();
-
+            console.log("CONNECT NODES");
+self.tracks = [];
+            for (var ind=0; ind<=self.numTracks; ind++){
             
+              (function(){
+
+                  var trackNodes = self.nodes.filter(function(node){
+                    return ind == node.track;
+                  })
+                  self.tracks.push(trackNodes);
+                  if(trackNodes.length > 1){
+                  console.log(trackNodes);
+              
+              for (var i=1; i<trackNodes.length; i++){
+              (function() {
+
+                  var source = trackNodes[i-1].tag,
+                      target = trackNodes[i].tag;
+console.log(source);
+                  if (source && target){
+                    var observer = new PathObserver(source, 'output');     
+                    observer.open(function(newValue, oldValue) {
+                       // console.log(source);
+                       // console.log("output changed!");
+                       // console.log(newValue)
+                       target.input = newValue;
+                    });
+                    target.input = source.output; 
+                  }
+                  
+                })();
+              }
+              }
+            })();
           }
         },
         _expandSelected: function(e, detail, selection){
@@ -310,7 +353,11 @@
             node.classList.add('collapsed');
           })
         },
-
+        _addNewTrack: function(){
+          var self = this;
+          // self.numTracks++;
+          // self.
+        },
         generateUniqueId: function(elName){
           var self = this;
           
@@ -441,6 +488,19 @@
         },
         collapseFilter: function(node){
           return node.opened ? "" : "collapsed";
+        },
+        newTrackRight: function(e, detail, selection){
+          console.log("*********");
+          // console.log(this.numTracks);
+          // this.numTracks__
+          return this.numTracks++;
+        },
+        _addTrack: function(e, detail, selection){
+          this.numTracks++;
+          this._addNode(e, detail, selection);
+        },
+        arrayFilter: function(value){
+          return new Array(value);
         }
 
       });
