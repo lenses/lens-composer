@@ -271,12 +271,21 @@
           var self = this;
           if(confirm('Are you sure you want to remove this step?')) {
             console.log("delete node");
-            
             var index = selection.dataset.index;
+            if (self.nodes[index].type == 'input'){
+              console.log('delete track');
+              var track = self.nodes[index].track;
+              self.numTracks--;
+              self.tracks.splice(track,1);
+              self.nodes.forEach(function(node){ if (node.track > track){ node.track--;}})
+            }
+            
             self.removeChild(self.nodes[index].tag);
             self.nodes.splice(index, 1)
+            
             this._connectNodes();
           }
+
         },
         _connectNodes: function(){
             var self = this;
