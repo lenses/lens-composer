@@ -229,40 +229,52 @@ paper-dropdown-menu /deep/ core-icon {
   border: 4px solid #ddd;
 }
 
-.collapsed.track1 {
+.collapsed.track2 {
   -ms-transform: translate(80px,0px); /* IE 9 */
   -webkit-transform: translate(80px,0px); /* Safari */
   transform: translate(80px,0px);
-}
-
-.add-options.track1 {
-  -ms-transform: translate(80px,0px); /* IE 9 */
-  -webkit-transform: translate(80px,0px); /* Safari */
-  transform: translate(80px,0px);
-}
-
-.collapsed.track2{
-  -ms-transform: translate(160px,0px); /* IE 9 */
-  -webkit-transform: translate(160px,0px); /* Safari */
-  transform: translate(160px,0px);
 }
 
 .add-options.track2 {
+  -ms-transform: translate(80px,0px); /* IE 9 */
+  -webkit-transform: translate(80px,0px); /* Safari */
+  transform: translate(80px,0px);
+}
+
+.collapsed.track3{
   -ms-transform: translate(160px,0px); /* IE 9 */
   -webkit-transform: translate(160px,0px); /* Safari */
   transform: translate(160px,0px);
 }
 
-.collapsed.track3{
+.add-options.track3 {
+  -ms-transform: translate(160px,0px); /* IE 9 */
+  -webkit-transform: translate(160px,0px); /* Safari */
+  transform: translate(160px,0px);
+}
+
+.collapsed.track4{
   -ms-transform: translate(220px,0px); /* IE 9 */
   -webkit-transform: translate(220px,0px); /* Safari */
   transform: translate(220px,0px);
 }
 
-.add-options.track3 {
+.add-options.track4 {
   -ms-transform: translate(220px,0px); /* IE 9 */
   -webkit-transform: translate(220px,0px); /* Safari */
   transform: translate(220px,0px);
+}
+
+.collapsed.track5{
+  -ms-transform: translate(280px,0px); /* IE 9 */
+  -webkit-transform: translate(280px,0px); /* Safari */
+  transform: translate(280px,0px);
+}
+
+.add-options.track5 {
+  -ms-transform: translate(280px,0px); /* IE 9 */
+  -webkit-transform: translate(280px,0px); /* Safari */
+  transform: translate(280px,0px);
 }
 
 

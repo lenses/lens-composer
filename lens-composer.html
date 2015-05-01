@@ -64,7 +64,7 @@
     <template if="{{!nodes.length}}">
       
       <div class="add-options">
-        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
+        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="1" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
       </div>
     </template>
 
@@ -103,8 +103,8 @@
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
         // theme: 'lenses',
-        uniqueCounter: 0,
-        numTracks: 0,
+        _uniqueCounter: 0,
+        _numTracks: 0,
         nodes: [],
         observe: {
           theme: "updateTheme"
@@ -145,7 +145,7 @@
           self.themeNames = Object.keys(self.themes);
           
 
-          self.uniqueCounter = self.nodes.length;
+          self._uniqueCounter = self.nodes.length;
 
           self._setupNodes();
 
@@ -204,7 +204,6 @@
                   );
                 }
             });
-            console.log(self.nodes);
             this._connectNodes();
           }         
         },
@@ -223,7 +222,7 @@
               if (component.type =='input'){
                 return false;
               }
-              if (component.type == 'join' && self.numTracks < 2){
+              if (component.type == 'join' && self._numTracks < 2){
                 return false;
               }
               return true;
@@ -242,22 +241,15 @@
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
           
-          track = track >= 0 ? track : self.numTracks;
+          track = track >= 0 ? track : self._numTracks;
           // Collapse all nodes
           self._collapseNodes();
 
           var index = selection.dataset.index;
-          if (parseInt(index) == 0){
-            // self.numTracks++;
-          }
+         console.log("track:" + track);
+         console.log("index:" + index);
+         console.log("_numTracks: " + self._numTracks);
 
-               console.log("**");
-     console.log(track);
-     console.log(index)
-     console.log("numTracks: " + self.numTracks);
-          // console.log(track);
-          // console.log(index);
-          // console.log("numTracks: " + self.numTracks);
           var newNode = { 
             name: 'lens-node',
             id: newEl.id,
@@ -275,11 +267,16 @@
           if(confirm('Are you sure you want to remove this step?')) {
             console.log("delete node");
             var index = selection.dataset.index;
+            console.log("index: " + index);
             if (self.nodes[index].type == 'input'){
               console.log('delete track');
               var track = self.nodes[index].track;
-              self.numTracks--;
-              self.tracks.splice(track,1);
+              console.log("track:" + track);
+              console.log(self.tracks[(track-1)]);
+              console.log("_numTracks: " + self._numTracks);
+              self._numTracks--;
+              self.tracks.splice((track-1),1);
+
               self.nodes.forEach(function(node){ if (node.track > track){ node.track--;}})
             }
             
@@ -292,8 +289,8 @@
         _connectNodes: function(){
             var self = this;
             console.log("CONNECT NODES");
-self.tracks = [];
-            for (var ind=0; ind<=self.numTracks; ind++){
+            self.tracks = [];
+            for (var ind=1; ind<=self._numTracks; ind++){
             
               (function(){
 
@@ -302,20 +299,15 @@ self.tracks = [];
                   })
                   self.tracks.push(trackNodes);
                   if(trackNodes.length > 1){
-                  console.log(trackNodes);
               
               for (var i=1; i<trackNodes.length; i++){
               (function() {
 
                   var source = trackNodes[i-1].tag,
                       target = trackNodes[i].tag;
-console.log(source);
                   if (source && target){
                     var observer = new PathObserver(source, 'output');     
                     observer.open(function(newValue, oldValue) {
-                       // console.log(source);
-                       // console.log("output changed!");
-                       // console.log(newValue)
                        target.input = newValue;
                     });
                     target.input = source.output; 
@@ -366,15 +358,15 @@ console.log(source);
         },
         _addNewTrack: function(){
           var self = this;
-          // self.numTracks++;
+          // self._numTracks++;
           // self.
         },
         generateUniqueId: function(elName){
           var self = this;
           
-          var uniqueId = elName + '-' + self.uniqueCounter;
+          var uniqueId = elName + '-' + self._uniqueCounter;
           
-          self.uniqueCounter+= 1;
+          self._uniqueCounter+= 1;
 
           return uniqueId;
         },
@@ -426,7 +418,7 @@ console.log(source);
           self.nodes = nodesArray;
           
           // Set the counter to 1 higher than the highest count of existing node ids
-          self.uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
+          self._uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
             var splitId = item.id.split('-'); 
             var num = parseInt(splitId[splitId.length-1])+1; 
             return num; 
@@ -500,18 +492,9 @@ console.log(source);
         collapseFilter: function(node){
           return node.opened ? "" : "collapsed";
         },
-        newTrackRight: function(e, detail, selection){
-          console.log("*********");
-          // console.log(this.numTracks);
-          // this.numTracks__
-          return this.numTracks++;
-        },
         _addTrack: function(e, detail, selection){
-          this.numTracks++;
+          this._numTracks++;
           this._addNode(e, detail, selection);
-        },
-        arrayFilter: function(value){
-          return new Array(value);
         }
 
       });
