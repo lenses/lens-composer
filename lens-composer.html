@@ -64,7 +64,7 @@
     <template if="{{!nodes.length}}">
       
       <div class="add-options">
-        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addNode}}"></core-icon></div>
+        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
       </div>
     </template>
 
@@ -223,6 +223,9 @@
               if (component.type =='input'){
                 return false;
               }
+              if (component.type == 'join' && self.numTracks < 2){
+                return false;
+              }
               return true;
             }
           })
@@ -282,7 +285,6 @@
             
             self.removeChild(self.nodes[index].tag);
             self.nodes.splice(index, 1)
-            
             this._connectNodes();
           }
 
