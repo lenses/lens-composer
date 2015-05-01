@@ -144,10 +144,14 @@
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
           
-
           self._uniqueCounter = self.nodes.length;
 
-          self._setupNodes();
+          // self._setupNodes();
+
+          self.addEventListener('lens-load', function(e){
+            console.log("LOAD LENS");
+            self.loadLens(e.detail)
+          })
 
         },
         updateTheme: function(){
@@ -156,56 +160,33 @@
           this.fire("th-theme-changed", this.theme);
         },
         _setupNodes: function(){
-          var self = this,
-              boringTags = ['div','ul','li','span','th-editor','br'],
-              numNodes = self.nodes.length;
+          // var self = this,
+          //     boringTags = ['div','ul','li','span','th-editor','br'],
+          //     numNodes = self.nodes.length;
 
-          // If nodes array is given, recreate elements
-          if (numNodes > 0){
-            // for(var i=0;i<numNodes; i++){
-            //   var node = self.nodes[i],
-            //       nodeExists = document.querySelector('#'+node.id) ? true : false;
-              
-            //   if (!nodeExists){
-            //     node.tag = self._createNewNode(node.name, node.type, node.id);
-            //     if(i>0){
-            //       self._connectNodes();
-            //     }
-            //     if (node.componentName){
-            //       // console.log(JSON.parse(node.componentState));
-            //       var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
-            //       console.log('CREATE ELEMENT');
-            //       console.log(node.componentName);
+          // // If nodes array is given, recreate elements
 
-            //       node.tag.createElement(node.componentName, componentState);
-            //     }
-            //   }
-            // }
-            
-          
-          // Otherwise use child elements to create nodes array
-          } else { 
-            var elements = self.querySelectorAll('lens-node'); 
-            [].forEach.call(elements, function(el, i) {
-                var elName = el.tagName.toLowerCase();
+          //   var elements = self.querySelectorAll('lens-node'); 
+          //   [].forEach.call(elements, function(el, i) {
+          //       var elName = el.tagName.toLowerCase();
 
-                // Set unique ID to each element
-                el.id = el.id || self.generateUniqueId(elName);
+          //       // Set unique ID to each element
+          //       el.id = el.id || self.generateUniqueId(elName);
                 
-                var index=boringTags.indexOf(elName);
-                if(index<0) {
-                  self.nodes.push(
-                    { tag: el, // DOM element
-                      id: el.id, // unique ID
-                      name: elName, // lens-node
-                      type: el.type
+          //       var index=boringTags.indexOf(elName);
+          //       if(index<0) {
+          //         self.nodes.push(
+          //           { tag: el, // DOM element
+          //             id: el.id, // unique ID
+          //             name: elName, // lens-node
+          //             type: el.type
 
-                    }
-                  );
-                }
-            });
-            this._connectNodes();
-          }         
+          //           }
+          //         );
+          //       }
+          //   });
+          //   this._connectNodes();
+              
         },
         _createNewNode: function(name, type, id, finalResult){
           var self = this;
@@ -242,13 +223,13 @@
           e.stopPropagation(); 
           
           track = track >= 0 ? track : self._numTracks;
+          
           // Collapse all nodes
           self._collapseNodes();
 
           var index = selection.dataset.index;
          console.log("track:" + track);
          console.log("index:" + index);
-         console.log("_numTracks: " + self._numTracks);
 
           var newNode = { 
             name: 'lens-node',
@@ -269,15 +250,9 @@
             var index = selection.dataset.index;
             console.log("index: " + index);
             if (self.nodes[index].type == 'input'){
-              console.log('delete track');
-              var track = self.nodes[index].track;
-              console.log("track:" + track);
-              console.log(self.tracks[(track-1)]);
-              console.log("_numTracks: " + self._numTracks);
-              self._numTracks--;
-              self.tracks.splice((track-1),1);
-
-              self.nodes.forEach(function(node){ if (node.track > track){ node.track--;}})
+              var trackNum = self.nodes[index].track;
+              self._deleteTrack(trackNum);
+              
             }
             
             self.removeChild(self.nodes[index].tag);
@@ -345,8 +320,8 @@
           })
         },
         _collapseNodes: function(e){
-          var self = this;
-          var nodeContainers = self.shadowRoot.querySelectorAll('.node');
+          var self = this,
+              nodeContainers = self.shadowRoot.querySelectorAll('.node');
   
           self.nodes.forEach(function(node,i){
             node.opened = false;
@@ -356,15 +331,9 @@
             node.classList.add('collapsed');
           })
         },
-        _addNewTrack: function(){
-          var self = this;
-          // self._numTracks++;
-          // self.
-        },
         generateUniqueId: function(elName){
-          var self = this;
-          
-          var uniqueId = elName + '-' + self._uniqueCounter;
+          var self = this,
+              uniqueId = elName + '-' + self._uniqueCounter;
           
           self._uniqueCounter+= 1;
 
@@ -381,7 +350,7 @@
           var self = this;
           var finalResult = self.nodes.filter(function(item){ return item.tag.finalResult });
           if (!finalResult.length){
-            var visualNodes = self.nodes.filter(function(item){ return item.type == "visualize"});  
+            var visualNodes = self.nodes.filter(function(item){ return item.tag.type == "visualize"});  
             if (visualNodes.length){
               visualNodes[visualNodes.length - 1].tag.finalResult = true;
               visualNodes[visualNodes.length - 1].finalResult = true;
@@ -389,18 +358,20 @@
             
           }
         },
-        getState: function(){
+        saveLens: function(){
           var self = this;
           self._selectDefaultFinalResult();
 
           var nodes = self.nodes.map(function(node){
-            var newNode = {};
-            var keys = Object.keys(node);
+            var newNode = {},
+                keys = Object.keys(node);
+            
             keys.forEach(function(key) {
                newNode[key] = node[key];
             });
 
             newNode.finalResult = node.tag.finalResult;
+            newNode.type = node.tag.type;
             
             self._addComponentInfoToNode(newNode);
             self._removeHTMLfromNode(newNode);
@@ -408,14 +379,27 @@
             return newNode;
           })
 
-          return JSON.stringify(nodes);
+          var lensData = {
+            'title': self.lensTitle,
+            'author': self.lensAuthor,
+            'theme': self.theme,
+            'nodes': nodes
+          }
+
+          self.fire('lens-save', lensData);
+          return lensData;
+          // TODO: include finalResult in this data for node app?
         },
 
-        recreateLens: function(nodesArray){
+        loadLens: function(lensData){
           var self = this,
-              numNodes = nodesArray.length;
-          
-          self.nodes = nodesArray;
+              numNodes = lensData.nodes.length;
+
+          // Apply settings
+          self.nodes = lensData.nodes;
+          self.lensTitle = lensData.title;
+          self.lensAuthor = lensData.author;
+          self.theme = lensData.theme;
           
           // Set the counter to 1 higher than the highest count of existing node ids
           self._uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
@@ -423,23 +407,42 @@
             var num = parseInt(splitId[splitId.length-1])+1; 
             return num; 
           }));
+          
+          // Recreate nodes and components
+          for(var i=0;i<numNodes; i++){
+            var node = self.nodes[i],
+                nodeExists = document.querySelector('#'+node.id) ? true : false;
 
-            for(var i=0;i<numNodes; i++){
-              var node = self.nodes[i],
-                  nodeExists = document.querySelector('#'+node.id) ? true : false;
-              
-              if (!nodeExists){
-                node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
-                if(i>0){
-                  self._connectNodes();
-                }
-                if (node.componentName){
-                  var componentState = node.componentState ? node.componentState : null; 
-                  node.tag.createElementFromSavedData(node.componentName, componentState);
-                }
+            if (!nodeExists){
+              if(node.type == 'input'){ self._numTracks++; }
+              node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
+              if (i>0){
+                self._connectNodes();
+              }
+              if (node.componentName){ 
+                var componentState = node.componentState ? node.componentState : null; 
+                node.tag.createElementFromSavedData(node.componentName, componentState);
               }
             }
+          }
             
+        },
+        resetLens: function(){
+          var self = this;
+
+          // Remove nodes
+          self.nodes.forEach(function(node){
+            self.removeChild(node.tag);
+          });
+
+          // Reset defaults
+          self.nodes = [];
+          self.tracks = [];
+          self._numTracks = 0;
+          self._uniqueCounter = 0;
+          self.lensTitle = "";
+          self.lensAuthor = "";
+          self.theme = "";
         },
         getFinalResult: function(){
           var self = this;
@@ -458,6 +461,27 @@
 
           return;
         },
+        collapseFilter: function(node){
+          return node.opened ? "" : "collapsed";
+        },
+        _addTrack: function(e, detail, selection){
+          this._numTracks++;
+          this._addNode(e, detail, selection);
+        },
+        _deleteTrack: function(trackNum){
+          var self = this;
+          console.log('delete track: ' + trackNum);
+          
+          self._numTracks--;
+          self.tracks.splice((trackNum-1),1);
+          self.nodes.forEach(function(node, i){ 
+            if (node.track == trackNum){ 
+              self.removeChild(node.tag);
+              self.nodes.splice(i,1);
+            }
+            if (node.track > trackNum){ node.track--;}
+          })
+        },
         _addComponentInfoToNode: function(node){
           var self = this;
           if(node.tag.component){
@@ -467,17 +491,15 @@
         },
         _removeHTMLfromNode: function(node){
           delete node.tag;
-
         },
         _getComponentState: function(component){
           var currentState = {};
           for(var attribute in component.publish){
-            if(attribute !== 'output'){
+            // if(attribute !== 'output'){
               currentState[attribute] = component[attribute];
-            }
+            // }
           }
           return currentState;
-
         },
         _getComponentStateMinimal: function(component){
           var currentState = {};
@@ -487,16 +509,7 @@
             }
           }
           return currentState;
-
-        },
-        collapseFilter: function(node){
-          return node.opened ? "" : "collapsed";
-        },
-        _addTrack: function(e, detail, selection){
-          this._numTracks++;
-          this._addNode(e, detail, selection);
         }
-
       });
 
   </script>
