@@ -153,6 +153,10 @@
             self.loadLens(e.detail)
           })
 
+          if (self.nodes.length){
+            self.buildNodes(self.nodes);
+          }
+
         },
         updateTheme: function(){
           window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
@@ -323,6 +327,7 @@
           var self = this,
               nodeContainers = self.shadowRoot.querySelectorAll('.node');
   
+          console.log(self.nodes);
           self.nodes.forEach(function(node,i){
             node.opened = false;
           });
@@ -409,22 +414,7 @@
           }));
           
           // Recreate nodes and components
-          for(var i=0;i<numNodes; i++){
-            var node = self.nodes[i],
-                nodeExists = document.querySelector('#'+node.id) ? true : false;
-
-            if (!nodeExists){
-              if(node.type == 'input'){ self._numTracks++; }
-              node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
-              if (i>0){
-                self._connectNodes();
-              }
-              if (node.componentName){ 
-                var componentState = node.componentState ? node.componentState : null; 
-                node.tag.createElementFromSavedData(node.componentName, componentState);
-              }
-            }
-          }
+          self.buildNodes(nodes);
             
         },
         resetLens: function(){
@@ -444,6 +434,28 @@
           self.lensAuthor = "";
           self.theme = "";
         },
+        buildNodes: function(nodes){
+          var self = this,
+              numNodes = nodes.length;
+
+          for(var i=0;i<numNodes; i++){
+            var node = nodes[i],
+                nodeExists = document.querySelector('#'+node.id) ? true : false;
+
+            if (!nodeExists){
+              if(node.type == 'input'){ self._numTracks++; }
+              node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
+              if (i>0){
+                self._connectNodes();
+              }
+              if (node.componentName){ 
+                var componentState = node.componentState ? node.componentState : null; 
+                node.tag.createElementFromSavedData(node.componentName, componentState);
+              }
+            }
+          }
+
+        },
         getFinalResult: function(){
           var self = this;
           for (var i=0; i<self.nodes.length; i++){
@@ -455,7 +467,7 @@
                         'componentName': componentName,
                         'componentState': componentState
                       };
-              return JSON.stringify(finalResult);
+              return finalResult;
             }
           }
 
