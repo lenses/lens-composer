@@ -327,7 +327,6 @@
           var self = this,
               nodeContainers = self.shadowRoot.querySelectorAll('.node');
   
-          console.log(self.nodes);
           self.nodes.forEach(function(node,i){
             node.opened = false;
           });
@@ -363,7 +362,7 @@
             
           }
         },
-        saveLens: function(){
+        dumpData: function(){
           var self = this;
           self._selectDefaultFinalResult();
 
@@ -378,23 +377,18 @@
             newNode.finalResult = node.tag.finalResult;
             newNode.type = node.tag.type;
             
+            
             self._addComponentInfoToNode(newNode);
             self._removeHTMLfromNode(newNode);
             
             return newNode;
           })
 
-          var lensData = {
-            'title': self.lensTitle,
-            'author': self.lensAuthor,
-            'theme': self.theme,
-            'nodes': nodes
-          }
 
-          self.fire('lens-save', lensData);
-          return lensData;
+          return nodes;
           // TODO: include finalResult in this data for node app?
         },
+
 
         loadLens: function(lensData){
           var self = this,
@@ -443,6 +437,8 @@
                 nodeExists = document.querySelector('#'+node.id) ? true : false;
 
             if (!nodeExists){
+              console.log("node does not exist");
+              console.log(node);
               if(node.type == 'input'){ self._numTracks++; }
               node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
               if (i>0){
@@ -452,6 +448,9 @@
                 var componentState = node.componentState ? node.componentState : null; 
                 node.tag.createElementFromSavedData(node.componentName, componentState);
               }
+            } else {
+              console.log("node exists");
+              console.log(node);
             }
           }
 
