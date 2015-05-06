@@ -154,6 +154,7 @@
           })
 
           if (self.nodes.length){
+            self._setUniqueCounter();
             self.buildNodes(self.nodes);
           }
 
@@ -525,6 +526,15 @@
             }
           }
           return currentState;
+        },
+        _setUniqueCounter: function(){
+          var self = this;
+          self.nodes.forEach(function(node){
+            var id = parseInt(node.id.match(/\d+/)[0]);
+            if(id >= self._uniqueCounter){
+              self._uniqueCounter = id + 1;
+            }
+          })
         }
       });
 
