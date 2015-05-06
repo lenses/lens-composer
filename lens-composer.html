@@ -279,22 +279,22 @@
                   self.tracks.push(trackNodes);
                   if(trackNodes.length > 1){
               
-              for (var i=1; i<trackNodes.length; i++){
-              (function() {
+                    for (var i=1; i<trackNodes.length; i++){
+                    (function() {
 
-                  var source = trackNodes[i-1].tag,
-                      target = trackNodes[i].tag;
-                  if (source && target){
-                    var observer = new PathObserver(source, 'output');     
-                    observer.open(function(newValue, oldValue) {
-                       target.input = newValue;
-                    });
-                    target.input = source.output; 
+                        var source = trackNodes[i-1].tag,
+                            target = trackNodes[i].tag;
+                        if (source && target){
+                          var observer = new PathObserver(source, 'output');     
+                          observer.open(function(newValue, oldValue) {
+                             target.input = newValue;
+                          });
+                          target.input = source.output; 
+                        }
+                        
+                      })();
+                    }
                   }
-                  
-                })();
-              }
-              }
             })();
           }
         },
@@ -384,9 +384,8 @@
             return newNode;
           })
 
-
-          return nodes;
-          // TODO: include finalResult in this data for node app?
+          // TEMP -- only when DB returns stringified array
+          return JSON.stringify(nodes);
         },
 
 
@@ -429,8 +428,14 @@
           self.theme = "";
         },
         buildNodes: function(nodes){
-          var self = this,
-              numNodes = nodes.length;
+          var self = this;
+
+          // TEMP -- only when DB returns stringified array
+          if(typeof(nodes)=="string"){
+            nodes = JSON.parse(nodes);
+          }
+          
+          var numNodes = nodes.length;
 
           for(var i=0;i<numNodes; i++){
             var node = nodes[i],
