@@ -143,15 +143,6 @@
           self.fire('lens-composer-ready', self)
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
-          
-          self._uniqueCounter = self.nodes.length;
-
-          // self._setupNodes();
-
-          self.addEventListener('lens-load', function(e){
-            console.log("LOAD LENS");
-            self.loadLens(e.detail)
-          })
 
           if (self.nodes.length){
             self._setUniqueCounter();
@@ -193,12 +184,11 @@
           //   this._connectNodes();
               
         },
-        _createNewNode: function(name, type, id, finalResult){
+        _createNewNode: function(name, type, id){
           var self = this;
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
-          newEl.finalResult = finalResult;
           newEl.componentList = self.componentList.filter(function(component){
             if (type =='input'){
               if (component.type =='input'){
@@ -375,8 +365,14 @@
                newNode[key] = node[key];
             });
 
-            newNode.finalResult = node.tag.finalResult;
-            newNode.type = node.tag.type;
+            for(var attribute in newNode.tag.publish){
+              newNode[attribute] = newNode.tag[attribute];
+            }
+
+            console.log( newNode);
+
+            // newNode.finalResult = node.tag.finalResult;
+            // newNode.type = node.tag.type;
             
             
             self._addComponentInfoToNode(newNode);
@@ -389,7 +385,7 @@
           return JSON.stringify(nodes);
         },
 
-
+        // NOT BEING USED
         loadLens: function(lensData){
           var self = this,
               numNodes = lensData.nodes.length;
@@ -443,10 +439,17 @@
                 nodeExists = document.querySelector('#'+node.id) ? true : false;
 
             if (!nodeExists){
-              console.log("node does not exist");
-              console.log(node);
+              console.log("node does not exist, building");
+              
               if(node.type == 'input'){ self._numTracks++; }
-              node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
+
+              node.tag = self._createNewNode(node.name, node.type, node.id);
+              
+              // Set all the saved attrs for the node
+              for(var attr in node.tag.publish){
+                node.tag[attr] = node[attr];
+              }
+
               if (i>0){
                 self._connectNodes();
               }
