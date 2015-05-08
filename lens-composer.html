@@ -145,6 +145,7 @@
           self.themeNames = Object.keys(self.themes);
 
           if (self.nodes.length){
+            self._parseNodes();
             self._setUniqueCounter();
             self.buildNodes(self.nodes);
           }
@@ -424,12 +425,20 @@
           self.lensAuthor = "";
           self.theme = "";
         },
+        _parseNodes: function(){
+          var self = this;
+          if(typeof(self.nodes)=="string"){
+            self.nodes = JSON.parse(self.nodes);
+          }
+          
+        },
         buildNodes: function(nodes){
           var self = this;
 
           // TEMP -- only when DB returns stringified array
           if(typeof(nodes)=="string"){
             nodes = JSON.parse(nodes);
+            self.nodes = nodes;
           }
           
           var numNodes = nodes.length;
@@ -532,6 +541,7 @@
         },
         _setUniqueCounter: function(){
           var self = this;
+          console.log(self.nodes);
           self.nodes.forEach(function(node){
             var id = parseInt(node.id.match(/\d+/)[0]);
             if(id >= self._uniqueCounter){
