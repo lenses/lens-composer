@@ -11,149 +11,14 @@
 <polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
   <core-style ref="theme"></theme>
   <template>
-    <style>
+    <link rel="stylesheet" href="lens-composer.css">
 
-      h1, h3 {
-        text-align: center;
-      }
 
-      .add-button {
-        width: 36px;
-        height: 36px;
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-        background-color: #eee;
-        border-radius: 50%;
-        padding: 5px;
-        margin-top: 3px;
-      }
-
-      .add-button /deep/ [fit] { /* selects icon svg */
-        padding: 10px;
-        box-sizing: border-box;
-      }
-
-      .icon {
-        display: inline-block;
-        margin: 0 8px;
-      }
-
-      .small {
-        -webkit-margin-before: 0;
-        -webkit-margin-after: 0;
-        margin: 0;
-        font-size: 0.7em;
-      }
-
-      .add-options {
-        margin: 50px auto;
-        text-align: center;
-      }
-
-      .node-container {
-        position: relative;
-        width: 80%;
-        margin: 20px auto;
-      }
-
-      .delete-button {
-        position: absolute;
-        right: 3px;
-        top: 3px;
-        cursor: pointer;
-        width: 20px;
-        z-index: 1;
-        color: white;
-      }
-
-      ::content > * {
-        width: 100%;
-        height: 100%;
-      }
-
-      .disable {
-        opacity: 0.5
-      }
-
-      paper-input /deep/ ::content * {
-        text-align: center;
-      }
-
-      paper-input {
-        width: auto;
-      }
-
-      core-selector {
-        margin: 0 auto;
-        position: relative;
-        min-height: 10px;
-        max-height: 200px;
-        overflow-y: scroll; 
-        display: inline-block;
-        border: 1px solid #EEE;
-        cursor: pointer;
-        background-color: white;
-      }
-
-      core-selector div {
-
-        padding: 1px;
-        display: block;
-        margin: 0 3px;
-        padding: 1px;
-      }
-
-      core-selector div:hover {
-        background-color: #eee;
-      }
-
-      core-selector .core-selected {
-        background-color: #ccc;
-      }
-
-      .theme-selector {
-        margin: 0 auto;
-        width: 200px;
-        text-align: center;
-      }
-
-      .theme-selector > * {
-        margin: 0 auto;
-        text-align: left;
-        width: 200px;
-      }
-
-      .dropdown-item, .selected-item {
-        padding: 5px 5px 0px 5px;
-        border-bottom: 1px solid white;
-      }
-
-      .selected-item {
-        position: absolute;
-        left: 0;
-        overflow: hidden;
-        height: 21px;
-      }
-
-      .swatch {
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        list-style-type: none;
-        display: inline-block;
-      }
-
-      paper-dropdown-menu /deep/ core-icon {
-        z-index: 100;
-      }
-
-    </style>
-
+    <!-- Title and Author fields -->
     <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
     <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
     
-    <!-- THEME SELECTOR -->
+    <!-- Theme selector -->
     <div class="theme-selector">
       <paper-dropdown-menu  label="Choose a theme">
         <template  if="{{theme}}">
@@ -187,56 +52,102 @@
       </paper-dropdown-menu>
     </div>
 
-    <!-- Handles server side communication --> 
-    <core-ajax id="create" method="POST" url="/lenses" bodyType="json"  body='{{element_data}}'></core-ajax>
-      <!-- core ajax cannot currently handle posting nested objects -- see github issue #37 -->
+    <template if="{{nodes.length}}">
+      <div class="utility-buttons">
+        <button on-click="{{_collapseNodes}}"> Collapse All</button>
+        <button on-click="{{_expandNodes}}"> Expand All</button>
+        <button on-click="{{_addTrack}}" data-node-type="input" data-index="{{nodes.length}}"> Add New Track</button>
+      </div>
+    </template>
 
-    <!-- Menu of components? --> 
-    <!-- <th-component-list></th-component-list> -->
+    <!-- Starting state with 'add' button -->
+    <template if="{{!nodes.length}}">
+      
+      <div class="add-options">
+        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="1" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
+      </div>
+    </template>
 
     <!-- Nodes -->
-
-    <div id="nodeContainer">
-      <template repeat="{{node, index in nodes}}">
-
-        <div class="node-container">
-          <template if="{{index > 0}}">
-            <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
-          </template>
-          <content select="#{{node.id}}" on-click="{{toggleNodes}}"></content>
-        </div>
+    <template if="{{nodes.length}}">
+      <div id="nodeContainer" on-click="{{_collapseNodes}}">        
         
-        <div class="add-options">
-          <div class="icon"><p class="small disable">Add data</p><core-icon class="add-button disable" data-node-type="input" icon="image:grid-on" data-index="{{index+1}}" on-click="{{}}"></core-icon></div>
-          <div class="icon"><p class="small">Transform</p><core-icon class="add-button" data-node-type="transform" icon="settings-input-component" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-          <div class="icon"><p class="small">Add chart</p><core-icon class="add-button" data-node-type="visualize" icon="editor:insert-chart" data-index="{{index+1}}" on-click="{{_addNode}}"></core-icon></div>
-        </div>
-      </template>
-    </div>
+        <div class="line"></div>
+        <template repeat="{{node, index in nodes}}">
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
+            <template if="{{!node.opened}}">
+              <span class="description">{{node.tag.componentName}}</span>
+            </template>
+            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6"> 
+              <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
+              <content select="#{{node.id}}"></content>
+            </core-collapse>
+          </div>
+          <div class="add-options track{{node.track}}">
+            
+            <core-icon class="add-button " icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
+            
+          </div>
+         
 
+
+        </template>
+
+      </div>
+      
+    </template>
   </template>
-
   <script>
 
       Polymer('lens-composer', {
         // lensTitle: 'Example Lens',
         // lensAuthor: 'Nisha Batra',
         // theme: 'lenses',
-        uniqueCounter: 0,
+        _uniqueCounter: 0,
+        _numTracks: 0,
         nodes: [],
         observe: {
           theme: "updateTheme"
         },
+        componentList: [
+          {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+          {name:'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
+          {name:'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          
+          {name:'lens-data-convert-date', friendly: 'Convert Date Formats', type: 'transform'},
+          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
+          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
+          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
+          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
+          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
+          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
+          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
+          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
+
+          {name:'lens-data-zip', friendly: 'Join Tracks', type: 'join'},
+
+          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
+          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
+          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
+          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
+          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'}
+          // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+      ],
         ready: function(){
           var self = this;
           self.fire('lens-composer-ready', self)
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
-          
 
-          self.uniqueCounter = self.nodes.length;
-
-          self._setupNodes();
+          if (self.nodes.length){
+            self._setUniqueCounter();
+            self.buildNodes(self.nodes);
+          }
 
         },
         updateTheme: function(){
@@ -245,67 +156,54 @@
           this.fire("th-theme-changed", this.theme);
         },
         _setupNodes: function(){
-          var self = this,
-              boringTags = ['div','ul','li','span','th-editor','br'],
-              numNodes = self.nodes.length;
+          // var self = this,
+          //     boringTags = ['div','ul','li','span','th-editor','br'],
+          //     numNodes = self.nodes.length;
 
-          // If nodes array is given, recreate elements
-          if (numNodes > 0){
-            // for(var i=0;i<numNodes; i++){
-            //   var node = self.nodes[i],
-            //       nodeExists = document.querySelector('#'+node.id) ? true : false;
-              
-            //   if (!nodeExists){
-            //     node.tag = self._createNewNode(node.name, node.type, node.id);
-            //     if(i>0){
-            //       self._connectNodes();
-            //     }
-            //     if (node.componentName){
-            //       // console.log(JSON.parse(node.componentState));
-            //       var componentState = node.componentState.length > 1 ? JSON.parse(node.componentState) : null; 
-            //       console.log('CREATE ELEMENT');
-            //       console.log(node.componentName);
+          // // If nodes array is given, recreate elements
 
-            //       node.tag.createElement(node.componentName, componentState);
-            //     }
-            //   }
-            // }
-            
-          
-          // Otherwise use child elements to create nodes array
-          } else { 
-            var elements = self.querySelectorAll('lens-node'); 
-            [].forEach.call(elements, function(el, i) {
-                var elName = el.tagName.toLowerCase();
+          //   var elements = self.querySelectorAll('lens-node'); 
+          //   [].forEach.call(elements, function(el, i) {
+          //       var elName = el.tagName.toLowerCase();
 
-                // Set unique ID to each element
-                el.id = el.id || self.generateUniqueId(elName);
+          //       // Set unique ID to each element
+          //       el.id = el.id || self.generateUniqueId(elName);
                 
-                var index=boringTags.indexOf(elName);
-                if(index<0) {
-                  self.nodes.push(
-                    { tag: el, // DOM element
-                      id: el.id, // unique ID
-                      name: elName, // lens-node
-                      type: el.type
+          //       var index=boringTags.indexOf(elName);
+          //       if(index<0) {
+          //         self.nodes.push(
+          //           { tag: el, // DOM element
+          //             id: el.id, // unique ID
+          //             name: elName, // lens-node
+          //             type: el.type
 
-                    }
-                  );
-                }
-            });
-            this._connectNodes();
-          }
-
-          
-         
+          //           }
+          //         );
+          //       }
+          //   });
+          //   this._connectNodes();
+              
         },
-        _createNewNode: function(name, type, id, finalResult){
+        _createNewNode: function(name, type, id){
           var self = this;
           var newEl = document.createElement(name);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
-          newEl.finalResult = finalResult;
-          
+          newEl.componentList = self.componentList.filter(function(component){
+            if (type =='input'){
+              if (component.type =='input'){
+                return true;
+              }
+            } else {
+              if (component.type =='input'){
+                return false;
+              }
+              if (component.type == 'join' && self._numTracks < 2){
+                return false;
+              }
+              return true;
+            }
+          })
           self.appendChild(newEl);
           return newEl;
         },
@@ -313,14 +211,28 @@
           console.log("add node");
           var self = this,
               type = selection.dataset.nodeType,
+              track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
+
+          // Prevent click event from bubbling up to nodeContainer (which collapses all)
+          e.stopPropagation(); 
           
+          track = track >= 0 ? track : self._numTracks;
+          
+          // Collapse all nodes
+          self._collapseNodes();
+
           var index = selection.dataset.index;
+         console.log("track:" + track);
+         console.log("index:" + index);
+
           var newNode = { 
             name: 'lens-node',
             id: newEl.id,
             tag: newEl,
-            type: type
+            type: type,
+            opened: true,
+            track: track
           }
 
           self.nodes.splice(index,0,newNode); // determine correct place to insert node
@@ -328,66 +240,99 @@
         },
         _deleteNode: function(e, detail, selection){
           var self = this;
-          console.log("delete node");
-          
-          var index = selection.dataset.index;
-          self.removeChild(self.nodes[index].tag);
-          self.nodes.splice(index, 1)
-          this._connectNodes();
+          if(confirm('Are you sure you want to remove this step?')) {
+            console.log("delete node");
+            var index = selection.dataset.index;
+            console.log("index: " + index);
+            if (self.nodes[index].type == 'input'){
+              var trackNum = self.nodes[index].track;
+              self._deleteTrack(trackNum);
+              
+            }
+            
+            self.removeChild(self.nodes[index].tag);
+            self.nodes.splice(index, 1)
+            this._connectNodes();
+          }
+
         },
         _connectNodes: function(){
             var self = this;
-            // console.log("CONNECT NODES");
-            for (var i=1; i<self.nodes.length; i++){
-            (function() {
-                var source = self.nodes[i-1].tag,
-                    target = self.nodes[i].tag;
-
-                if (source && target){
-                  var observer = new PathObserver(source, 'output');     
-                  observer.open(function(newValue, oldValue) {
-                     // console.log(source);
-                     // console.log("output changed!");
-                     // console.log(newValue)
-                     target.input = newValue;
-                  });
-                  target.input = source.output; 
-                }
-                
-            })();
-
+            console.log("CONNECT NODES");
+            self.tracks = [];
+            for (var ind=1; ind<=self._numTracks; ind++){
             
+              (function(){
+
+                  var trackNodes = self.nodes.filter(function(node){
+                    return ind == node.track;
+                  })
+                  self.tracks.push(trackNodes);
+                  if(trackNodes.length > 1){
+              
+                    for (var i=1; i<trackNodes.length; i++){
+                    (function() {
+
+                        var source = trackNodes[i-1].tag,
+                            target = trackNodes[i].tag;
+                        if (source && target){
+                          var observer = new PathObserver(source, 'output');     
+                          observer.open(function(newValue, oldValue) {
+                             target.input = newValue;
+                          });
+                          target.input = source.output; 
+                        }
+                        
+                      })();
+                    }
+                  }
+            })();
           }
         },
-
-        generateUniqueId: function(elName){
+        _expandSelected: function(e, detail, selection){
           var self = this;
+          // Prevent click event from bubbling up to nodeContainer (which collapses all)
+          e.stopPropagation(); 
+
+          // Collapse all nodes
+          self._collapseNodes();
+
+          // Expand core-collapse and div
+          self.nodes[selection.dataset.index].opened = true;
+          selection.classList.remove('collapsed');
           
-          var uniqueId = elName + '-' + self.uniqueCounter;
+        },
+        _expandNodes: function(e){
+          var self = this;
+          var nodeContainers = self.shadowRoot.querySelectorAll('.node');
+  
+          self.nodes.forEach(function(node,i){
+            node.opened = true;
+          });
+
+          [].forEach.call(nodeContainers, function(node, i){
+            node.classList.remove('collapsed');
+          })
+        },
+        _collapseNodes: function(e){
+          var self = this,
+              nodeContainers = self.shadowRoot.querySelectorAll('.node');
+  
+          self.nodes.forEach(function(node,i){
+            node.opened = false;
+          });
+
+          [].forEach.call(nodeContainers, function(node, i){
+            node.classList.add('collapsed');
+          })
+        },
+        generateUniqueId: function(elName){
+          var self = this,
+              uniqueId = elName + '-' + self._uniqueCounter;
           
-          self.uniqueCounter+= 1;
+          self._uniqueCounter+= 1;
 
           return uniqueId;
-        },
-        toggleNodes: function(e, detail, selection){
-          var self = this;
-          
-          // Collapse all sections
-          for(var i=0;i<self.nodes.length; i++){
-            var node = self.nodes[i].tag.shadowRoot,
-                sections = node.querySelectorAll('core-collapse');
-            for (var index=0; index<sections.length; index++){
-              sections[index].opened = false;
-            }
-          }
-
-          // Expand sections of selected node
-          var currentNode = self.querySelector(selection.select).shadowRoot,
-              currentSections = currentNode.querySelectorAll('core-collapse')
-          for (var i=0; i<currentSections.length; i++){
-            currentSections[i].opened = true;
-          }   
-
         },
         deselectFinalResultAll: function(){
           var self= this;
@@ -400,7 +345,7 @@
           var self = this;
           var finalResult = self.nodes.filter(function(item){ return item.tag.finalResult });
           if (!finalResult.length){
-            var visualNodes = self.nodes.filter(function(item){ return item.type == "visualize"});  
+            var visualNodes = self.nodes.filter(function(item){ return item.tag.type == "visualize"});  
             if (visualNodes.length){
               visualNodes[visualNodes.length - 1].tag.finalResult = true;
               visualNodes[visualNodes.length - 1].finalResult = true;
@@ -408,18 +353,27 @@
             
           }
         },
-        getState: function(){
+        dumpData: function(){
           var self = this;
           self._selectDefaultFinalResult();
 
           var nodes = self.nodes.map(function(node){
-            var newNode = {};
-            var keys = Object.keys(node);
+            var newNode = {},
+                keys = Object.keys(node);
+            
             keys.forEach(function(key) {
                newNode[key] = node[key];
             });
 
-            newNode.finalResult = node.tag.finalResult;
+            for(var attribute in newNode.tag.publish){
+              newNode[attribute] = newNode.tag[attribute];
+            }
+
+            console.log( newNode);
+
+            // newNode.finalResult = node.tag.finalResult;
+            // newNode.type = node.tag.type;
+            
             
             self._addComponentInfoToNode(newNode);
             self._removeHTMLfromNode(newNode);
@@ -427,38 +381,88 @@
             return newNode;
           })
 
+          // TEMP -- only when DB returns stringified array
           return JSON.stringify(nodes);
         },
 
-        recreateLens: function(nodesArray){
+        // NOT BEING USED
+        loadLens: function(lensData){
           var self = this,
-              numNodes = nodesArray.length;
-          
-          self.nodes = nodesArray;
+              numNodes = lensData.nodes.length;
+
+          // Apply settings
+          self.nodes = lensData.nodes;
+          self.lensTitle = lensData.title;
+          self.lensAuthor = lensData.author;
+          self.theme = lensData.theme;
           
           // Set the counter to 1 higher than the highest count of existing node ids
-          self.uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
+          self._uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
             var splitId = item.id.split('-'); 
             var num = parseInt(splitId[splitId.length-1])+1; 
             return num; 
           }));
-
-            for(var i=0;i<numNodes; i++){
-              var node = self.nodes[i],
-                  nodeExists = document.querySelector('#'+node.id) ? true : false;
-              
-              if (!nodeExists){
-                node.tag = self._createNewNode(node.name, node.type, node.id, node.finalResult);
-                if(i>0){
-                  self._connectNodes();
-                }
-                if (node.componentName){
-                  var componentState = node.componentState ? node.componentState : null; 
-                  node.tag.createElementFromSavedData(node.componentName, componentState);
-                }
-              }
-            }
+          
+          // Recreate nodes and components
+          self.buildNodes(nodes);
             
+        },
+        resetLens: function(){
+          var self = this;
+
+          // Remove nodes
+          self.nodes.forEach(function(node){
+            self.removeChild(node.tag);
+          });
+
+          // Reset defaults
+          self.nodes = [];
+          self.tracks = [];
+          self._numTracks = 0;
+          self._uniqueCounter = 0;
+          self.lensTitle = "";
+          self.lensAuthor = "";
+          self.theme = "";
+        },
+        buildNodes: function(nodes){
+          var self = this;
+
+          // TEMP -- only when DB returns stringified array
+          if(typeof(nodes)=="string"){
+            nodes = JSON.parse(nodes);
+          }
+          
+          var numNodes = nodes.length;
+
+          for(var i=0;i<numNodes; i++){
+            var node = nodes[i],
+                nodeExists = document.querySelector('#'+node.id) ? true : false;
+
+            if (!nodeExists){
+              console.log("node does not exist, building");
+              
+              if(node.type == 'input'){ self._numTracks++; }
+
+              node.tag = self._createNewNode(node.name, node.type, node.id);
+              
+              // Set all the saved attrs for the node
+              for(var attr in node.tag.publish){
+                node.tag[attr] = node[attr];
+              }
+
+              if (i>0){
+                self._connectNodes();
+              }
+              if (node.componentName){ 
+                var componentState = node.componentState ? node.componentState : null; 
+                node.tag.createElementFromSavedData(node.componentName, componentState);
+              }
+            } else {
+              console.log("node exists");
+              console.log(node);
+            }
+          }
+
         },
         getFinalResult: function(){
           var self = this;
@@ -471,11 +475,32 @@
                         'componentName': componentName,
                         'componentState': componentState
                       };
-              return JSON.stringify(finalResult);
+              return finalResult;
             }
           }
 
           return;
+        },
+        collapseFilter: function(node){
+          return node.opened ? "" : "collapsed";
+        },
+        _addTrack: function(e, detail, selection){
+          this._numTracks++;
+          this._addNode(e, detail, selection);
+        },
+        _deleteTrack: function(trackNum){
+          var self = this;
+          console.log('delete track: ' + trackNum);
+          
+          self._numTracks--;
+          self.tracks.splice((trackNum-1),1);
+          self.nodes.forEach(function(node, i){ 
+            if (node.track == trackNum){ 
+              self.removeChild(node.tag);
+              self.nodes.splice(i,1);
+            }
+            if (node.track > trackNum){ node.track--;}
+          })
         },
         _addComponentInfoToNode: function(node){
           var self = this;
@@ -486,17 +511,15 @@
         },
         _removeHTMLfromNode: function(node){
           delete node.tag;
-
         },
         _getComponentState: function(component){
           var currentState = {};
           for(var attribute in component.publish){
-            if(attribute !== 'output'){
+            // if(attribute !== 'output'){
               currentState[attribute] = component[attribute];
-            }
+            // }
           }
           return currentState;
-
         },
         _getComponentStateMinimal: function(component){
           var currentState = {};
@@ -506,9 +529,16 @@
             }
           }
           return currentState;
-
+        },
+        _setUniqueCounter: function(){
+          var self = this;
+          self.nodes.forEach(function(node){
+            var id = parseInt(node.id.match(/\d+/)[0]);
+            if(id >= self._uniqueCounter){
+              self._uniqueCounter = id + 1;
+            }
+          })
         }
-
       });
 
   </script>

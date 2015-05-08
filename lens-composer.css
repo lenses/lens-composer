@@ -1,0 +1,334 @@
+:host {
+  padding: 10px 30px;
+  display: block;
+}
+
+/* Title and author styles START*/
+h1 {
+  font-size: 1.5em;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+}
+
+h3 {
+  font-size: 1em;
+  -webkit-margin-before: 0.2em;
+  -webkit-margin-after: 0.2em;
+}
+
+h1 paper-input, h3 paper-input { 
+  width: 100%;
+}
+
+/* restyle paper input */
+:host /deep/ paper-input-decorator { /* remove padding from paper-input */
+  padding: 0;
+}
+
+
+paper-input /deep/ #underline > * { /* removes underline from all paper-input */
+  background: none;
+}
+
+
+/* Title and author styles END*/
+
+/*** Theme selector styles START ***/ 
+
+.theme-selector {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  text-align: center;
+  font-size: 10pt;
+}
+
+.theme-selector > * {
+  margin: 0 auto;
+  text-align: left;
+  width: 200px;
+}
+
+.theme-selector paper-input /deep/ ::content * {
+  text-align: center;
+}
+
+core-selector {
+  margin: 0 auto;
+  position: relative;
+  min-height: 10px;
+  max-height: 200px;
+  overflow-y: scroll; 
+  display: inline-block;
+  border: 1px solid #EEE;
+  cursor: pointer;
+  background-color: white;
+}
+
+core-selector div {
+  padding: 1px;
+  display: block;
+  margin: 0 3px;
+  padding: 1px;
+}
+
+core-selector div:hover {
+  background-color: #eee;
+}
+
+core-selector .core-selected {
+  background-color: #ccc;
+}
+
+.dropdown-item, .selected-item {
+  padding: 5px 5px 0px 5px;
+  border-bottom: 1px solid white;
+}
+
+.selected-item {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  height: 21px;
+}
+
+.swatch {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  list-style-type: none;
+  display: inline-block;
+}
+
+paper-dropdown-menu /deep/ core-icon {
+  z-index: 100;
+}
+/*** Theme selector styles END ***/ 
+
+/*** Line and node styles START ***/
+#nodeContainer { /* container for all nodes */
+  position: relative;
+  width: 100%;
+  margin: 40px auto;
+}
+
+.line {
+  width: 8px;
+  height: 100%;
+  position: absolute;
+  background-color: #eee;
+  border: 2px solid white;
+  box-sizing: border-box;
+  left:50%;
+  margin-left:-4px;
+}
+
+.add-options { /* container for add button */
+  margin: 50px auto;
+  text-align: center;
+}
+
+.add-button {
+  width: 10px;
+  height: 10px;
+  position: relative;
+  margin: 0 auto;
+  cursor: pointer;
+  background-color: #4FC1FF;
+  border-radius: 50%;
+  color: white;
+  margin-top: 10px;
+  transition: 0.3s ease-out;
+  border: 3px solid white;
+}
+
+.add-track {
+  width: 10px;
+  height: 10px;
+  position: relative;
+  margin: 0 auto;
+  transform: translate(80px, 0px);
+  cursor: pointer;
+  background-color: pink;
+  border-radius: 50%;
+  color: white;
+  margin-top: 10px;
+  transition: 0.3s ease-out;
+  border: 3px solid white;
+}
+
+.add-button-start{ 
+  width: 30px;
+  height: 30px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  background-color: #4FC1FF;
+  border-radius: 50%;
+  color: white;
+  margin-top: 0;
+   -webkit-animation: pulse 2.5s infinite;
+   -moz-animation: pulse 2.5s infinite;
+   -o-animation: pulse 2.5s infinite;
+    animation: pulse 2.5s infinite;
+}
+
+@-webkit-keyframes pulse {
+    0% {-webkit-transform: scale(1, 1); opacity: 0.5}
+    50% {-webkit-transform: scale(1.5, 1.5); opacity: 1;}
+    100% {-webkit-transform: scale(1, 1); opacity: 0.5;}
+}
+
+.add-button /deep/ [fit] { /* selects icon svg */
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.add-button:hover {
+  width: 30px;
+  height: 30px;
+  margin-top: 0;
+}
+
+.node {
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 4px solid #eee;
+  background: white;
+  border-radius: 3px;
+  box-sizing: border-box;
+  transform: translate(0px,0px);
+
+}
+
+.node .description {
+  position: absolute;
+  display: inline;
+  left: 30px;
+  min-width: 300px;
+  margin-top: -2px;
+}
+
+.collapsed /deep/ ::content * {
+  opacity: 0;
+}
+
+.collapsed {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #eee;
+  cursor: pointer;
+  transition: width 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.1s ease-out; 
+}
+
+.collapsed:hover {
+  background-color: #ddd;
+  border: 4px solid #ddd;
+}
+
+
+
+.collapsed.track2 {
+  -ms-transform: translate(80px,0px); /* IE 9 */
+  -webkit-transform: translate(80px,0px); /* Safari */
+  transform: translate(80px,0px);
+}
+
+.add-options.track2 {
+  -ms-transform: translate(80px,0px); /* IE 9 */
+  -webkit-transform: translate(80px,0px); /* Safari */
+  transform: translate(80px,0px);
+}
+
+.collapsed.track3{
+  -ms-transform: translate(160px,0px); /* IE 9 */
+  -webkit-transform: translate(160px,0px); /* Safari */
+  transform: translate(160px,0px);
+}
+
+.add-options.track3 {
+  -ms-transform: translate(160px,0px); /* IE 9 */
+  -webkit-transform: translate(160px,0px); /* Safari */
+  transform: translate(160px,0px);
+}
+
+.collapsed.track4{
+  -ms-transform: translate(220px,0px); /* IE 9 */
+  -webkit-transform: translate(220px,0px); /* Safari */
+  transform: translate(220px,0px);
+}
+
+.add-options.track4 {
+  -ms-transform: translate(220px,0px); /* IE 9 */
+  -webkit-transform: translate(220px,0px); /* Safari */
+  transform: translate(220px,0px);
+}
+
+.collapsed.track5{
+  -ms-transform: translate(280px,0px); /* IE 9 */
+  -webkit-transform: translate(280px,0px); /* Safari */
+  transform: translate(280px,0px);
+}
+
+.add-options.track5 {
+  -ms-transform: translate(280px,0px); /* IE 9 */
+  -webkit-transform: translate(280px,0px); /* Safari */
+  transform: translate(280px,0px);
+}
+
+
+.visualize {
+  background-color: white;
+}
+
+.visualize:hover {
+  background-color: white;
+}
+/*** Line and node styles END ***/
+
+/*** Styles for things inside active node START ***/
+.delete-button {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  cursor: pointer;
+  width: 20px;
+  z-index: 1;
+  color: black;
+}
+
+::content > * {
+  width: 100%;
+  height: 100%;
+}
+/*** Styles for things inside active node END ***/
+
+
+
+/*** UNUSED STYLES ***/
+
+.utility-buttons {
+  position: relative;
+  margin: 0 auto;
+  width: 270px
+}
+
+.utility-buttons button {
+  cursor: pointer;
+}
+
+
+.small { /* text above button add button */
+ /* -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  margin: 0;
+  font-size: 0.7em;*/
+}
+
+
+.disable {
+  /*opacity: 0.5*/
+}
