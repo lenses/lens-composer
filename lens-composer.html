@@ -145,6 +145,7 @@
           self.themeNames = Object.keys(self.themes);
 
           if (self.nodes.length){
+            self._parseNodes();
             self._setUniqueCounter();
             self.buildNodes(self.nodes);
           }
@@ -154,35 +155,6 @@
           window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
 
           this.fire("th-theme-changed", this.theme);
-        },
-        _setupNodes: function(){
-          // var self = this,
-          //     boringTags = ['div','ul','li','span','th-editor','br'],
-          //     numNodes = self.nodes.length;
-
-          // // If nodes array is given, recreate elements
-
-          //   var elements = self.querySelectorAll('lens-node'); 
-          //   [].forEach.call(elements, function(el, i) {
-          //       var elName = el.tagName.toLowerCase();
-
-          //       // Set unique ID to each element
-          //       el.id = el.id || self.generateUniqueId(elName);
-                
-          //       var index=boringTags.indexOf(elName);
-          //       if(index<0) {
-          //         self.nodes.push(
-          //           { tag: el, // DOM element
-          //             id: el.id, // unique ID
-          //             name: elName, // lens-node
-          //             type: el.type
-
-          //           }
-          //         );
-          //       }
-          //   });
-          //   this._connectNodes();
-              
         },
         _createNewNode: function(name, type, id){
           var self = this;
@@ -381,6 +353,8 @@
             return newNode;
           })
 
+          // TEMP -- only when DB returns stringified array
+          // return JSON.stringify(nodes);
           return nodes;
         },
 
@@ -423,7 +397,12 @@
           self.lensAuthor = "";
           self.theme = "";
         },
-
+        _parseNodes: function(){
+          var self = this;
+          if(typeof(self.nodes)=="string"){
+            self.nodes = JSON.parse(self.nodes);
+          }
+        },
         buildNodes: function(nodes){
           var self = this;
 
