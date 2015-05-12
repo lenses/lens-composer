@@ -6,7 +6,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#~0.5.5",
     "th-theme": "thelmanews/th-theme",
-    "lens-node": "lenses/lens-node#feature/multi-track",
+    "lens-node": "lenses/lens-node",
     "lens-input-elements": "lenses/lens-input-elements",
     "lens-transform-elements": "lenses/lens-transform-elements",
     "lens-visual-elements": "lenses/lens-visual-elements",
