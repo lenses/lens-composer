@@ -116,6 +116,7 @@
         // theme: 'lenses',
         _uniqueCounter: 0,
         _numTracks: 0,
+        _trackShift: 0,
         nodes: [],
         observe: {
           theme: "updateTheme"
@@ -280,8 +281,7 @@
                   }
             })();
           }
-          console.log("TRACKS");
-          console.log(self.tracks);
+
         },
         _expandSelected: function(e, detail, selection){
           var self = this;
@@ -362,8 +362,6 @@
             for(var attribute in newNode.tag.publish){
               newNode[attribute] = newNode.tag[attribute];
             }
-
-            // console.log( newNode);
 
             // newNode.finalResult = node.tag.finalResult;
             // newNode.type = node.tag.type;
