@@ -110,7 +110,15 @@ paper-dropdown-menu /deep/ core-icon {
   position: relative;
   width: 100%;
   margin: 40px auto;
+  /*overflow: hidden;*/
 }
+
+.link {
+  height: 60px;
+  /*overflow: hidden;*/
+  position: relative;
+}
+
 
 .line {
   width: 8px;
@@ -118,28 +126,39 @@ paper-dropdown-menu /deep/ core-icon {
   position: absolute;
   background-color: #eee;
   border: 2px solid white;
+  border-width: 0px 2px;
   box-sizing: border-box;
   left:50%;
   margin-left:-4px;
 }
 
-.add-options { /* container for add button */
-  margin: 50px auto;
+.add-button { /* container for add button */
+  margin: 0px auto;
   text-align: center;
+  z-index: 100;
 }
 
-.add-button {
-  width: 10px;
-  height: 10px;
+.add-icon {
+  width: 15px;
+  height: 15px;
   position: relative;
-  margin: 0 auto;
+  margin: 0px auto;
   cursor: pointer;
   background-color: #4FC1FF;
   border-radius: 50%;
   color: white;
-  margin-top: 10px;
   transition: 0.3s ease-out;
-  border: 3px solid white;
+  border: 2px solid white;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+
+.add-icon:hover {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  /*margin-top: 65px;*/
 }
 
 .add-track {
@@ -157,7 +176,7 @@ paper-dropdown-menu /deep/ core-icon {
   border: 3px solid white;
 }
 
-.add-button-start{ 
+.add-icon-start{ 
   width: 30px;
   height: 30px;
   position: relative;
@@ -179,16 +198,11 @@ paper-dropdown-menu /deep/ core-icon {
     100% {-webkit-transform: scale(1, 1); opacity: 0.5;}
 }
 
-.add-button /deep/ [fit] { /* selects icon svg */
+.add-icon /deep/ [fit] { /* selects icon svg */
   padding: 5px;
   box-sizing: border-box;
 }
 
-.add-button:hover {
-  width: 30px;
-  height: 30px;
-  margin-top: 0;
-}
 
 .node {
   margin: 0 auto;
@@ -237,11 +251,25 @@ paper-dropdown-menu /deep/ core-icon {
   transform: translate(80px,0px);
 }
 
-.add-options.track2 {
+.add-button.track2 {
   -ms-transform: translate(80px,0px); /* IE 9 */
   -webkit-transform: translate(80px,0px); /* Safari */
   transform: translate(80px,0px);
 }
+
+.line.track2 {
+  -ms-transform: translate(80px,0px); /* IE 9 */
+  -webkit-transform: translate(80px,0px); /* Safari */
+  transform: translate(80px,0px);
+}
+
+.link.track2 {
+  -ms-transform: translate(80px,0px); /* IE 9 */
+  -webkit-transform: translate(80px,0px); /* Safari */
+  transform: translate(80px,0px);
+}
+
+
 
 .collapsed.track3{
   -ms-transform: translate(160px,0px); /* IE 9 */
