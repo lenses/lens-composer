@@ -83,7 +83,7 @@
           </template>  
 
           <!-- Node itself (collpased as circle or expanded as box) -->
-          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
@@ -199,10 +199,11 @@
               type = selection.dataset.nodeType,
               track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
+          //
+          self._trackShift -= 50;
           
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
-          // console.log(track);
           track = track >= 0 ? track : self._numTracks-1;
           
           // Collapse all nodes
@@ -227,8 +228,7 @@
         _deleteNode: function(e, detail, selection){
           var self = this;
           var index = selection.dataset.index;
-console.log("REMOVE");
-console.log(index);
+
           if (selection.dataset.type === 'input'){
             if (confirm('By removing this step, you will delete the whole track. Are you sure you want to do this?')) {
               var trackNum = self.nodes[index].track;
@@ -480,10 +480,11 @@ console.log(index);
           return;
         },
         collapseFilter: function(node){
-          return node.opened ? "" : "collapsed";
+          return node.opened ? "opened" : "collapsed";
         },
         _addTrack: function(e, detail, selection){
           this._numTracks++;
+
           this._addNode(e, detail, selection);
         },
         _deleteTrack: function(trackNum){
@@ -533,7 +534,7 @@ console.log(index);
         },
         _setUniqueCounter: function(){
           var self = this;
-          // console.log(self.nodes);
+      
           self.nodes.forEach(function(node){
             var id = parseInt(node.id.match(/\d+/)[0]);
             if(id >= self._uniqueCounter){
@@ -541,10 +542,21 @@ console.log(index);
             }
           })
         },
-        _calculateTrackShift: function(value){
-          var shiftBy = (value.length - 1)*50;
-          return "transform: translate(-"+shiftBy+"px,0px);";
+        _calculateTrackShift: function(tracks){
+          var self = this;
+          if (tracks){
+            self._trackShift = -(tracks.length - 1)*50;
+            return "transform: translate("+self._trackShift+"px,0px);";
+          }
+        },
+        _calculateNodeShift: function(opened, track){
+          var self = this;
+          if (opened){
+            return "transform: translate("+ (self._trackShift * -1)+"px,0px);";
+          } 
+          
         }
+
       });
 
   </script>

@@ -203,7 +203,6 @@ paper-dropdown-menu /deep/ core-icon {
   border-radius: 3px;
   box-sizing: border-box;
   transform: translate(0px,0px);
-
 }
 
 .node .description { /* description of step (only shows when closed) */
@@ -322,6 +321,7 @@ paper-dropdown-menu /deep/ core-icon {
   -webkit-transform: translate(1000px,0px); /* Safari */
   transform: translate(1000px,0px);
 }
+
 
 
 /*** TEMP STYLES ***/
