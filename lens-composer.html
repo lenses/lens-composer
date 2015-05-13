@@ -54,43 +54,54 @@
 
     <template if="{{nodes.length}}">
       <div class="utility-buttons">
-        <button on-click="{{_collapseNodes}}"> Collapse All</button>
-        <button on-click="{{_expandNodes}}"> Expand All</button>
-        <button on-click="{{_addTrack}}" data-node-type="input" data-index="{{nodes.length}}"> Add New Track</button>
+        <button on-click="{{_addTrack}}" data-node-type="input" data-index="{{nodes.length}}"> Add New Dataset</button>
       </div>
     </template>
 
     <!-- Starting state with 'add' button -->
     <template if="{{!nodes.length}}">
       
-      <div class="add-options">
-        <div class="icon" ><core-icon class="add-button add-button-start" data-node-type="input" icon="add" data-track="1" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
+      <div class="add-button">
+        <div class="icon" ><core-icon class="add-icon add-icon-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
       </div>
     </template>
 
     <!-- Nodes -->
     <template if="{{nodes.length}}">
-      <div id="nodeContainer" on-click="{{_collapseNodes}}">        
-        
-        <div class="line"></div>
+      <div id="nodeContainer" on-click="{{_collapseNodes}}" style="{{tracks | _calculateTrackShift}};">                
         <template repeat="{{node, index in nodes}}">
-          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}">
+
+          <!-- Line before the step -->
+          <template if="{{index > 0}}">
+            <div class="link track{{node.track}}"> <!-- offset based on track -->
+              <template if="{{node.type !='input'}}">
+                <div class="line"></div> <!-- absolutely position in middle of div --> 
+              </template>
+            </div>
+          </template>  
+
+          <!-- Node itself (collpased as circle or expanded as box) -->
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
             <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6"> 
-              <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}"></core-icon>
+              <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}" data-type="{{node.type}}"></core-icon>
               <content select="#{{node.id}}"></content>
             </core-collapse>
           </div>
-          <div class="add-options track{{node.track}}">
-            
-            <core-icon class="add-button " icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
-            
+
+          
+          <!-- Line after the step -->
+          <div class="link track{{node.track}}"> <!-- offset based on track --> 
+            <div class="line"></div>  <!-- absolutely position in middle of div -->
           </div>
-         
 
-
+          <!-- Add button after the step -->
+           <div class="add-button track{{node.track}}" >
+              <core-icon class="add-icon" icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
+           </div>
+          
         </template>
 
       </div>
@@ -105,6 +116,7 @@
         // theme: 'lenses',
         _uniqueCounter: 0,
         _numTracks: 0,
+        _trackShift: 0,
         nodes: [],
         observe: {
           theme: "updateTheme"
@@ -186,11 +198,12 @@
               type = selection.dataset.nodeType,
               track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
-
+          //
+          self._trackShift -= 50;
+          
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
-          
-          track = track >= 0 ? track : self._numTracks;
+          track = track >= 0 ? track : self._numTracks-1;
           
           // Collapse all nodes
           self._collapseNodes();
@@ -213,36 +226,43 @@
         },
         _deleteNode: function(e, detail, selection){
           var self = this;
-          if(confirm('Are you sure you want to remove this step?')) {
-            console.log("delete node");
-            var index = selection.dataset.index;
-            console.log("index: " + index);
-            if (self.nodes[index].type == 'input'){
+          var index = selection.dataset.index;
+
+          if (selection.dataset.type === 'input'){
+            if (confirm('By removing this step, you will delete the whole track. Are you sure you want to do this?')) {
               var trackNum = self.nodes[index].track;
               self._deleteTrack(trackNum);
-              
+              // self.removeChild(self.nodes[index].tag);
+              // self.nodes.splice(index, 1)
             }
-            
-            self.removeChild(self.nodes[index].tag);
-            self.nodes.splice(index, 1)
-            this._connectNodes();
+          } else {
+            if (confirm('Are you sure you want to remove this step?')) {
+              self.removeChild(self.nodes[index].tag);
+              self.nodes.splice(index, 1)
+            }  
           }
-
+          
+          this._connectNodes();
         },
         _connectNodes: function(){
             var self = this;
             console.log("CONNECT NODES");
             self.tracks = [];
-            for (var ind=1; ind<=self._numTracks; ind++){
-            
+            for (var ind=0; ind<self._numTracks; ind++){
+            // console.log(ind);
+            // console.log(self._numTracks);
               (function(){
 
                   var trackNodes = self.nodes.filter(function(node){
                     return ind == node.track;
                   })
-                  self.tracks.push(trackNodes);
+
+                  if (trackNodes.length){
+                    console.log(trackNodes);
+                    self.tracks.push(trackNodes);
+                  }
+
                   if(trackNodes.length > 1){
-              
                     for (var i=1; i<trackNodes.length; i++){
                     (function() {
 
@@ -261,6 +281,7 @@
                   }
             })();
           }
+
         },
         _expandSelected: function(e, detail, selection){
           var self = this;
@@ -341,8 +362,6 @@
             for(var attribute in newNode.tag.publish){
               newNode[attribute] = newNode.tag[attribute];
             }
-
-            console.log( newNode);
 
             // newNode.finalResult = node.tag.finalResult;
             // newNode.type = node.tag.type;
@@ -457,25 +476,29 @@
           return;
         },
         collapseFilter: function(node){
-          return node.opened ? "" : "collapsed";
+          return node.opened ? "opened" : "collapsed";
         },
         _addTrack: function(e, detail, selection){
           this._numTracks++;
+
           this._addNode(e, detail, selection);
         },
         _deleteTrack: function(trackNum){
           var self = this;
-          console.log('delete track: ' + trackNum);
-          
           self._numTracks--;
-          self.tracks.splice((trackNum-1),1);
+          self.tracks.splice((trackNum),1);
+          
           self.nodes.forEach(function(node, i){ 
             if (node.track == trackNum){ 
               self.removeChild(node.tag);
-              self.nodes.splice(i,1);
-            }
-            if (node.track > trackNum){ node.track--;}
+              self.nodes[i] = null; // set to null temporarily to not affect indices inside loop
+            } else if (node.track > trackNum){ 
+              node.track--;
+            }   
           })
+          
+          self.nodes = self.nodes.filter(function(node){ return node;}); // remove nulls from array
+          
         },
         _addComponentInfoToNode: function(node){
           var self = this;
@@ -507,14 +530,29 @@
         },
         _setUniqueCounter: function(){
           var self = this;
-          console.log(self.nodes);
+      
           self.nodes.forEach(function(node){
             var id = parseInt(node.id.match(/\d+/)[0]);
             if(id >= self._uniqueCounter){
               self._uniqueCounter = id + 1;
             }
           })
+        },
+        _calculateTrackShift: function(tracks){
+          var self = this;
+          if (tracks){
+            self._trackShift = -(tracks.length - 1)*50;
+            return "transform: translate("+self._trackShift+"px,0px);";
+          }
+        },
+        _calculateNodeShift: function(opened, track){
+          var self = this;
+          if (opened){
+            return "transform: translate("+ (self._trackShift * -1)+"px,0px);";
+          } 
+          
         }
+
       });
 
   </script>

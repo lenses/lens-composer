@@ -30,7 +30,6 @@ paper-input /deep/ #underline > * { /* removes underline from all paper-input */
   background: none;
 }
 
-
 /* Title and author styles END*/
 
 /*** Theme selector styles START ***/ 
@@ -106,58 +105,70 @@ paper-dropdown-menu /deep/ core-icon {
 /*** Theme selector styles END ***/ 
 
 /*** Line and node styles START ***/
+
 #nodeContainer { /* container for all nodes */
   position: relative;
   width: 100%;
-  margin: 40px auto;
+  margin: 50px auto;
+  /*overflow: hidden;*/
 }
 
-.line {
+.link { /* full width container separating steps */
+  height: 60px;
+  position: relative;
+  transition: position 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.1s ease-out; 
+}
+
+
+.line { /* grey line down center of a link */
   width: 8px;
   height: 100%;
   position: absolute;
   background-color: #eee;
   border: 2px solid white;
+  border-width: 0px 2px;
   box-sizing: border-box;
   left:50%;
   margin-left:-4px;
 }
 
-.add-options { /* container for add button */
-  margin: 50px auto;
+.add-button { /* container for add button */
+  margin: 0px auto;
   text-align: center;
+  z-index: 100;
+  height: 15px;
+  transition: position 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.1s ease-out; 
 }
 
-.add-button {
-  width: 10px;
-  height: 10px;
+.add-icon { /* svg core-icon */
+  width: 15px;
+  height: 15px;
   position: relative;
-  margin: 0 auto;
+  margin: 0px auto;
   cursor: pointer;
   background-color: #4FC1FF;
   border-radius: 50%;
   color: white;
-  margin-top: 10px;
   transition: 0.3s ease-out;
   border: 3px solid white;
+  z-index: 100;
+  box-sizing: border-box;
+  vertical-align: top;
 }
 
-.add-track {
-  width: 10px;
-  height: 10px;
-  position: relative;
-  margin: 0 auto;
-  transform: translate(80px, 0px);
-  cursor: pointer;
-  background-color: pink;
-  border-radius: 50%;
-  color: white;
-  margin-top: 10px;
-  transition: 0.3s ease-out;
-  border: 3px solid white;
+.add-icon /deep/ [fit] { /* selects icon svg */
+  padding: 5px;
+  box-sizing: border-box;
 }
 
-.add-button-start{ 
+.add-icon:hover {
+  width: 30px;
+  height: 30px;
+  margin-top: -7px;
+  box-sizing: border-box;
+}
+
+.add-icon-start{ /* larger / pulsating svg core-icon */
   width: 30px;
   height: 30px;
   position: relative;
@@ -166,31 +177,24 @@ paper-dropdown-menu /deep/ core-icon {
   background-color: #4FC1FF;
   border-radius: 50%;
   color: white;
-  margin-top: 0;
-   -webkit-animation: pulse 2.5s infinite;
-   -moz-animation: pulse 2.5s infinite;
-   -o-animation: pulse 2.5s infinite;
-    animation: pulse 2.5s infinite;
+  margin-top: 50px;
+  -webkit-animation: pulse 2.5s infinite;
+  -moz-animation: pulse 2.5s infinite;
+  -o-animation: pulse 2.5s infinite;
+   animation: pulse 2.5s infinite;
+}
+
+.add-icon-start:hover{
+  margin-top: 50px;
 }
 
 @-webkit-keyframes pulse {
-    0% {-webkit-transform: scale(1, 1); opacity: 0.5}
-    50% {-webkit-transform: scale(1.5, 1.5); opacity: 1;}
-    100% {-webkit-transform: scale(1, 1); opacity: 0.5;}
+  0% {-webkit-transform: scale(1, 1); opacity: 0.5}
+  50% {-webkit-transform: scale(1.5, 1.5); opacity: 1;}
+  100% {-webkit-transform: scale(1, 1); opacity: 0.5;}
 }
 
-.add-button /deep/ [fit] { /* selects icon svg */
-  padding: 5px;
-  box-sizing: border-box;
-}
-
-.add-button:hover {
-  width: 30px;
-  height: 30px;
-  margin-top: 0;
-}
-
-.node {
+.node { /* container for lens-node */
   margin: 0 auto;
   position: relative;
   width: 100%;
@@ -200,10 +204,9 @@ paper-dropdown-menu /deep/ core-icon {
   border-radius: 3px;
   box-sizing: border-box;
   transform: translate(0px,0px);
-
 }
 
-.node .description {
+.node .description { /* description of step (only shows when closed) */
   position: absolute;
   display: inline;
   left: 30px;
@@ -211,11 +214,11 @@ paper-dropdown-menu /deep/ core-icon {
   margin-top: -2px;
 }
 
-.collapsed /deep/ ::content * {
+.collapsed /deep/ ::content * { /* hides the content of the .node when collapsing */
   opacity: 0;
 }
 
-.collapsed {
+.collapsed { /* transition .node into a small circle */
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -230,57 +233,7 @@ paper-dropdown-menu /deep/ core-icon {
 }
 
 
-
-.collapsed.track2 {
-  -ms-transform: translate(80px,0px); /* IE 9 */
-  -webkit-transform: translate(80px,0px); /* Safari */
-  transform: translate(80px,0px);
-}
-
-.add-options.track2 {
-  -ms-transform: translate(80px,0px); /* IE 9 */
-  -webkit-transform: translate(80px,0px); /* Safari */
-  transform: translate(80px,0px);
-}
-
-.collapsed.track3{
-  -ms-transform: translate(160px,0px); /* IE 9 */
-  -webkit-transform: translate(160px,0px); /* Safari */
-  transform: translate(160px,0px);
-}
-
-.add-options.track3 {
-  -ms-transform: translate(160px,0px); /* IE 9 */
-  -webkit-transform: translate(160px,0px); /* Safari */
-  transform: translate(160px,0px);
-}
-
-.collapsed.track4{
-  -ms-transform: translate(220px,0px); /* IE 9 */
-  -webkit-transform: translate(220px,0px); /* Safari */
-  transform: translate(220px,0px);
-}
-
-.add-options.track4 {
-  -ms-transform: translate(220px,0px); /* IE 9 */
-  -webkit-transform: translate(220px,0px); /* Safari */
-  transform: translate(220px,0px);
-}
-
-.collapsed.track5{
-  -ms-transform: translate(280px,0px); /* IE 9 */
-  -webkit-transform: translate(280px,0px); /* Safari */
-  transform: translate(280px,0px);
-}
-
-.add-options.track5 {
-  -ms-transform: translate(280px,0px); /* IE 9 */
-  -webkit-transform: translate(280px,0px); /* Safari */
-  transform: translate(280px,0px);
-}
-
-
-.visualize {
+.visualize { /* distinguish visual nodes as empty circle */
   background-color: white;
 }
 
@@ -307,28 +260,82 @@ paper-dropdown-menu /deep/ core-icon {
 /*** Styles for things inside active node END ***/
 
 
+/*** Track positioning styles ***/
 
-/*** UNUSED STYLES ***/
+.track1 {
+  -ms-transform: translate(100px,0px); /* IE 9 */
+  -webkit-transform: translate(100px,0px); /* Safari */
+  transform: translate(100px,0px);
+}
+
+.track2{
+  -ms-transform: translate(200px,0px); /* IE 9 */
+  -webkit-transform: translate(200px,0px); /* Safari */
+  transform: translate(200px,0px);
+}
+
+.track3{
+  -ms-transform: translate(300px,0px); /* IE 9 */
+  -webkit-transform: translate(300px,0px); /* Safari */
+  transform: translate(300px,0px);
+}
+
+.track4{
+  -ms-transform: translate(400px,0px); /* IE 9 */
+  -webkit-transform: translate(400px,0px); /* Safari */
+  transform: translate(400px,0px);
+}
+
+.track5{
+  -ms-transform: translate(500px,0px); /* IE 9 */
+  -webkit-transform: translate(500px,0px); /* Safari */
+  transform: translate(500px,0px);
+}
+
+.track6{
+  -ms-transform: translate(600px,0px); /* IE 9 */
+  -webkit-transform: translate(600px,0px); /* Safari */
+  transform: translate(600px,0px);
+}
+
+
+.track7{
+  -ms-transform: translate(700px,0px); /* IE 9 */
+  -webkit-transform: translate(700px,0px); /* Safari */
+  transform: translate(700px,0px);
+}
+
+.track8{
+  -ms-transform: translate(800px,0px); /* IE 9 */
+  -webkit-transform: translate(800px,0px); /* Safari */
+  transform: translate(800px,0px);
+}
+
+.track9{
+  -ms-transform: translate(900px,0px); /* IE 9 */
+  -webkit-transform: translate(900px,0px); /* Safari */
+  transform: translate(900px,0px);
+}
+
+.track10{
+  -ms-transform: translate(1000px,0px); /* IE 9 */
+  -webkit-transform: translate(1000px,0px); /* Safari */
+  transform: translate(1000px,0px);
+}
+
+
+
+/*** TEMP STYLES ***/
 
 .utility-buttons {
   position: relative;
   margin: 0 auto;
-  width: 270px
+  width: 115px;
 }
 
 .utility-buttons button {
   cursor: pointer;
+  margin: 0 auto;
+  display: block;
 }
 
-
-.small { /* text above button add button */
- /* -webkit-margin-before: 0;
-  -webkit-margin-after: 0;
-  margin: 0;
-  font-size: 0.7em;*/
-}
-
-
-.disable {
-  /*opacity: 0.5*/
-}
