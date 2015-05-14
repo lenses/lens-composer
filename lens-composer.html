@@ -197,9 +197,12 @@
               type = selection.dataset.nodeType,
               track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
-          //
-          self._trackShift -= 50;
           
+          // Every time a new track is added, adjust _trackShift
+          if (type === 'input'){
+            self._trackShift -= 50;
+          }
+
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
           track = track >= 0 ? track : self._numTracks-1;
