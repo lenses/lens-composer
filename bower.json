@@ -11,6 +11,7 @@
     "lens-transform-elements": "lenses/lens-transform-elements",
     "lens-visual-elements": "lenses/lens-visual-elements",
     "paper-input": "polymer/paper-input#~0.5.5",
-    "paper-dropdown-menu": "polymer/paper-dropdown-menu#~0.5.5"
+    "paper-dropdown-menu": "polymer/paper-dropdown-menu#~0.5.5",
+    "smooth-scroll": "https://github.com/cferdinandi/smooth-scroll.git"
   }
 }

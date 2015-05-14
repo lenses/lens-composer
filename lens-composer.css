@@ -1,6 +1,7 @@
 :host {
   padding: 10px 30px;
   display: block;
+  margin-bottom: 500px;
 }
 
 /* Title and author styles START*/
@@ -225,7 +226,7 @@ paper-dropdown-menu /deep/ core-icon {
   border-radius: 50%;
   background-color: #eee;
   cursor: pointer;
-  transition: width 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.1s ease-out; 
+  transition: width 0.4s ease-in-out, height 0.4s ease-in-out, transform 0.1s ease-out, opacity 0.1s ease-out; 
 }
 
 .collapsed:hover {

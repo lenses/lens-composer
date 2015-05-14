@@ -81,7 +81,7 @@
           </template>  
 
           <!-- Node itself (collpased as circle or expanded as box) -->
-          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
+          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" data-node-id="{{node.id}}" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
             <template if="{{!node.opened}}">
               <span class="description">{{node.tag.componentName}}</span>
             </template>
@@ -108,6 +108,7 @@
       
     </template>
   </template>
+  <script src="../smooth-scroll/dist/js/smooth-scroll.js"></script>
   <script>
 
       Polymer('lens-composer', {
@@ -116,6 +117,12 @@
         // theme: 'lenses',
         _uniqueCounter: 0,
         _numTracks: 0,
+        _scrollOptions: {
+          speed: 800, // Integer. How fast to complete the scroll in milliseconds
+          easing: 'easeInOutCubic', // Easing pattern to use
+          updateURL: false, // Boolean. Whether or not to update the URL with the anchor hash on scroll
+          offset: 85 // Pixels by which to offset the anchor to the top of the screen
+        },
         nodes: [],
         observe: {
           theme: "updateTheme"
@@ -152,6 +159,7 @@
       ],
         ready: function(){
           var self = this;
+          smoothScroll.init(self._scrollOptions);
           self.fire('lens-composer-ready', self)
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
@@ -224,7 +232,11 @@
           }
 
           self.nodes.splice(index,0,newNode); // determine correct place to insert node
+          
+          self._scrollToNode(newEl.id);
+          
           self._connectNodes();
+
         },
         _deleteNode: function(e, detail, selection){
           var self = this;
@@ -287,15 +299,19 @@
         },
         _expandSelected: function(e, detail, selection){
           var self = this;
+          var nodeId = selection.dataset.nodeId;
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
 
+          
           // Collapse all nodes
           self._collapseNodes();
 
           // Expand core-collapse and div
           self.nodes[selection.dataset.index].opened = true;
           selection.classList.remove('collapsed');
+          
+          self._scrollToNode(nodeId);
           
         },
         _expandNodes: function(e){
@@ -553,6 +569,24 @@
             return "transform: translate("+ (self._trackShift * -1)+"px,0px);";
           } 
           
+        },
+        _scrollToNode: function(nodeId){
+          var self = this;
+          if (nodeId){
+
+            // Delay because position depends on other nodes collapsing, which takes 0.4s, so wait until that is finished
+            setTimeout(function(nodeId){
+              var nodeId = '#' + nodeId;
+              var offsetTop = document.querySelector(nodeId).getBoundingClientRect().top;
+              var windowHeight = window.innerHeight;
+
+              if (offsetTop > windowHeight/2){
+                console.log("scroll down to "+ nodeId);
+                console.log(self._scrollOptions);
+                smoothScroll.animateScroll( null, nodeId, self._scrollOptions );  
+              }
+            }, 415, nodeId) 
+          }
         }
 
       });
