@@ -8,7 +8,7 @@
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
-<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
+<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor theme prevState">
   <core-style ref="theme"></theme>
   <template>
     <link rel="stylesheet" href="lens-composer.css">
@@ -164,10 +164,8 @@
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
 
-          if (self.nodes.length){
-            self._parseNodes();
-            self._setUniqueCounter();
-            self.buildNodes(self.nodes);
+          if (self.prevState){
+            self.loadLens(self.prevState);
           }
 
         },
@@ -206,9 +204,9 @@
               track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
           
-          // Every time a new track is added, adjust _trackShift
+          // Every time a new track is added, adjust trackShift
           if (type === 'input'){
-            self._trackShift -= 50;
+            self.trackShift -= 50;
           }
 
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
@@ -380,10 +378,6 @@
             for(var attribute in newNode.tag.publish){
               newNode[attribute] = newNode.tag[attribute];
             }
-
-            // newNode.finalResult = node.tag.finalResult;
-            // newNode.type = node.tag.type;
-            
             
             self._addComponentInfoToNode(newNode);
             self._removeHTMLfromNode(newNode);
@@ -391,31 +385,34 @@
             return newNode;
           })
 
+          var finalState = {
+            theme: self.theme,
+            trackShift: self.trackShift,
+            nodes: nodes
+          };
+
           // TEMP -- only when DB returns stringified array
           // return JSON.stringify(nodes);
-          return nodes;
+          return finalState;
         },
 
-        // NOT BEING USED
-        loadLens: function(lensData){
-          var self = this,
-              numNodes = lensData.nodes.length;
+        loadLens: function(prevState){
+          var self = this;
+
+          if(typeof(prevState)=="string"){
+            self.prevState = JSON.parse(prevState);
+          } 
 
           // Apply settings
-          self.nodes = lensData.nodes;
-          self.lensTitle = lensData.title;
-          self.lensAuthor = lensData.author;
-          self.theme = lensData.theme;
-          
-          // Set the counter to 1 higher than the highest count of existing node ids
-          self._uniqueCounter = Math.max.apply(null, self.nodes.map(function(item){ 
-            var splitId = item.id.split('-'); 
-            var num = parseInt(splitId[splitId.length-1])+1; 
-            return num; 
-          }));
+          self.nodes = self.prevState.nodes;
+          // self.lensTitle = lensData.title;
+          // self.lensAuthor = lensData.author;
+          self.theme = self.prevState.theme;
+          self.trackShift = self.prevState.trackShift;
+          self._setUniqueCounter();
           
           // Recreate nodes and components
-          self.buildNodes(nodes);
+          self.buildNodes(self.nodes);
             
         },
         resetLens: function(){
@@ -559,14 +556,16 @@
         _calculateTrackShift: function(tracks){
           var self = this;
           if (tracks){
-            self._trackShift = -(tracks.length - 1)*50;
-            return "transform: translate("+self._trackShift+"px,0px);";
+            
+            self.trackShift = -(tracks.length - 1)*50;
+
+            return "transform: translate("+self.trackShift+"px,0px);";
           }
         },
         _calculateNodeShift: function(opened, track){
           var self = this;
           if (opened){
-            return "transform: translate("+ (self._trackShift * -1)+"px,0px);";
+            return "transform: translate("+ (self.trackShift * -1)+"px,0px);";
           } 
           
         },
