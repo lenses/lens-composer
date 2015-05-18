@@ -8,7 +8,7 @@
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
-<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme">
+<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor nodes theme trackShift">
   <core-style ref="theme"></theme>
   <template>
     <link rel="stylesheet" href="lens-composer.css">
@@ -97,11 +97,16 @@
             <div class="line"></div>  <!-- absolutely position in middle of div -->
           </div>
 
-          <!-- Add button after the step -->
-           <div class="add-button track{{node.track}}" >
-              <core-icon class="add-icon" icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
-           </div>
-          
+          <!-- Add button after the step if the track has not been joined to another -->
+           <template if="{{!node.endOfTrack}}">
+             <div class="add-button track{{node.track}}" >
+                <core-icon class="add-icon" icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
+             </div>
+          </template>
+          <!-- Otherwise create a join line to another track -->
+          <template if="{{node.join}}">
+            <div id="join-{{node.id}}" style="{{node.join.styles}}"></div>
+          </template>
         </template>
 
       </div>
@@ -168,7 +173,18 @@
             self._parseNodes();
             self._setUniqueCounter();
             self.buildNodes(self.nodes);
+            self.updateJoins();
           }
+
+          self.addEventListener('lens-join', function(e){
+            console.log("LENS JOIN");
+            var res = e.detail,
+                track = self.tracks[res.joinFromTrackIndex];
+                joinToNodeId = res.joinToNodeId,
+                joinFromNodeId = track[track.length - 1].id;
+            
+            self._getJoinPosition(joinFromNodeId, joinToNodeId);
+          })
 
         },
         updateTheme: function(){
@@ -206,9 +222,9 @@
               track = parseInt(selection.dataset.track),
               newEl = self._createNewNode('lens-node', type);
           
-          // Every time a new track is added, adjust _trackShift
+          // Every time a new track is added, adjust trackShift
           if (type === 'input'){
-            self._trackShift -= 50;
+            self.trackShift -= 50;
           }
 
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
@@ -239,19 +255,24 @@
 
         },
         _deleteNode: function(e, detail, selection){
-          var self = this;
-          var index = selection.dataset.index;
+          var self = this,
+              index = selection.dataset.index,
+              node = self.nodes[index];
 
           if (selection.dataset.type === 'input'){
             if (confirm('By removing this step, you will delete the whole track. Are you sure you want to do this?')) {
-              var trackNum = self.nodes[index].track;
+              var trackNum = node.track;
               self._deleteTrack(trackNum);
               // self.removeChild(self.nodes[index].tag);
               // self.nodes.splice(index, 1)
             }
           } else {
             if (confirm('Are you sure you want to remove this step?')) {
-              self.removeChild(self.nodes[index].tag);
+              if (node.type === 'join'){
+                // TODO: find node it's connected to and set endOfTrack to false;
+              }
+              self.removeChild(node.tag);
+
               self.nodes.splice(index, 1)
             }  
           }
@@ -312,6 +333,10 @@
           selection.classList.remove('collapsed');
           
           self._scrollToNode(nodeId);
+          // setTimeout(function(){
+            self.updateJoins();
+          // },600)
+          
           
         },
         _expandNodes: function(e){
@@ -337,6 +362,10 @@
           [].forEach.call(nodeContainers, function(node, i){
             node.classList.add('collapsed');
           })
+
+
+          self.updateJoins();
+ 
         },
         generateUniqueId: function(elName){
           var self = this,
@@ -558,22 +587,27 @@
         },
         _calculateTrackShift: function(tracks){
           var self = this;
+          console.log("CALC TRACKSHIFT");
           if (tracks){
-            self._trackShift = -(tracks.length - 1)*50;
-            return "transform: translate("+self._trackShift+"px,0px);";
+            self.trackShift = -(tracks.length - 1)*50;
+            console.log(self.trackShift);
+            return "transform: translate("+self.trackShift+"px,0px);";
           }
         },
         _calculateNodeShift: function(opened, track){
           var self = this;
+          if (!self.trackShift){
+            self._calculateTrackShift(self.tracks);
+          }
           if (opened){
-            return "transform: translate("+ (self._trackShift * -1)+"px,0px);";
+            console.log("!");
+            return "transform: translate("+ (self.trackShift * -1)+"px,0px);";
           } 
           
         },
         _scrollToNode: function(nodeId){
           var self = this;
           if (nodeId){
-
             // Delay because position depends on other nodes collapsing, which takes 0.4s, so wait until that is finished
             setTimeout(function(nodeId){
               var nodeId = '#' + nodeId;
@@ -587,8 +621,90 @@
               }
             }, 415, nodeId) 
           }
-        }
+        },
+        _getJoinPosition: function(joinFromNodeId, joinToNodeId){
+          var self = this;
+          var fromNode, toNode, fromDiv, toDiv;
+          
+          // Find the node object from each id and update
+          self.nodes.forEach(function(node, i){
+            if (node.id === joinFromNodeId){
+              fromNode = node;
+              fromDiv = self.shadowRoot.querySelector('#step-'+i);
+              node.endOfTrack = true;
+            }
+            if (node.id === joinToNodeId){
+              toNode = node;
+              toDiv = self.shadowRoot.querySelector('#step-'+i);
+            }
+          })
 
+          var type =fromNode.track < toNode.track ? "left" : "right";
+          var distance = toNode.track - fromNode.track;
+
+          console.log(type);  
+
+          if (type==='left' && distance > 1){
+            self.trackShiftLeft(toNode.track, distance);
+          }
+
+          toNode.join = {
+            source: joinFromNodeId,
+            type: type,
+            top: Math.min(fromDiv.offsetTop, toDiv.offsetTop) + 8 +'px', // offset by 8px, half the width of the circle
+            left: fromDiv.offsetLeft + (fromDiv.offsetWidth / 2) - 2 + 'px', // offset by half the width of div less 2px for border
+            width: '100px', // distance between tracks is set at 100
+            height: Math.abs(toDiv.offsetTop - fromDiv.offsetTop) + 'px',
+          };
+          toNode.join.styles = self._getJoinStyles(toNode.join);
+          
+        },
+        _getJoinStyles: function(joinObj){
+
+          var styles = "position: absolute;  border-radius: 10px;";
+              styles += "left:"+joinObj.left+";"; 
+              styles += "top:"+joinObj.top+";"; 
+              styles += "height:"+joinObj.height+";"; 
+              styles += "width:"+joinObj.width+";"; 
+              if (joinObj.type ==='left'){
+                styles += "border-bottom: 4px solid #eee; border-left: 4px solid #eee;";
+              } else {
+                styles += "border-top: 4px solid #eee; border-right: 4px solid #eee;";
+              }
+          
+          return styles;
+        },
+        updateJoins: function(){
+          var self = this; 
+          var i = 0;
+
+          // For every node with a join connected to it, recalculate the position
+          self.nodes.forEach(function(node){
+            if(node.join){
+              // Constantly recalculate position while nodes are opening/closing (~6s);
+              var interval = setInterval(function(){
+                i++;
+                self._getJoinPosition(node.join.source, node.id);
+                if(i === 60) {
+                  clearInterval(interval);
+                }
+              },10);
+            }
+          })
+        },
+        shiftTrackLeft: function(track, distance){
+          var self = this;
+          self.tracks[track].forEach(function(node){
+            node.moveToTrack = node.track - distance;
+          })
+          console.log(self.nodes);
+          // TODO: 
+          // - change the track in each of the nodes
+          // - rearrange order of nodes? (to change vertical position)
+          // - reconnect nodes
+
+
+        }
       });
 
   </script>
