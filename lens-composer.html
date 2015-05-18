@@ -555,11 +555,13 @@
         },
         _calculateTrackShift: function(tracks){
           var self = this;
-          if (tracks){
-            
-            self.trackShift = -(tracks.length - 1)*50;
+          var scrollMargin = window.innerHeight;
 
-            return "transform: translate("+self.trackShift+"px,0px);";
+          if (tracks){
+            self.trackShift = -(tracks.length - 1)*50;
+            return "transform: translate("+self.trackShift+"px,0px); margin-bottom:"+scrollMargin+"px;";
+          } else {
+            return "margin-bottom:"+scrollMargin+"px;";
           }
         },
         _calculateNodeShift: function(opened, track){
