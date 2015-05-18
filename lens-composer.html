@@ -131,6 +131,7 @@
         },
         nodes: [],
         observe: {
+          prevState: 'loadLens',
           theme: "updateTheme"
         },
         componentList: [
@@ -197,7 +198,7 @@
         _createNewNode: function(name, type, id, track){
           var self = this;
           var newEl = document.createElement(name);
-          
+        
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.componentList = self.componentList.filter(function(component){
@@ -430,11 +431,11 @@
           return finalState;
         },
 
-        loadLens: function(prevState){
+        loadLens: function(){
           var self = this;
 
-          if(typeof(prevState)=="string"){
-            self.prevState = JSON.parse(prevState);
+          if(typeof(self.prevState)=="string"){
+            self.prevState = JSON.parse(self.prevState);
           } 
 
           // Apply settings
@@ -447,6 +448,7 @@
           
           // Recreate nodes and components
           self.buildNodes(self.nodes);
+          self.updateJoins();
             
         },
         resetLens: function(){
