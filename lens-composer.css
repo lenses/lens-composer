@@ -35,15 +35,13 @@ paper-input /deep/ #underline > * { /* removes underline from all paper-input */
 /*** Theme selector styles START ***/ 
 
 .theme-selector {
-  position: absolute;
-  top: 10px;
-  right: 50px;
+  display: inline-block;
   text-align: center;
   font-size: 10pt;
 }
 
 .theme-selector > * {
-  margin: 0 auto;
+  /*margin: 0 auto;*/
   text-align: left;
   width: 200px;
 }
@@ -54,6 +52,7 @@ paper-input /deep/ #underline > * { /* removes underline from all paper-input */
 
 core-selector {
   margin: 0 auto;
+  margin-left: 0;
   position: relative;
   min-height: 10px;
   max-height: 200px;
@@ -119,6 +118,9 @@ paper-dropdown-menu /deep/ core-icon {
   transition: position 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.1s ease-out; 
 }
 
+.join {
+  transition: position 0.1s ease-in-out;
+}
 
 .line { /* grey line down center of a link */
   width: 8px;
@@ -130,6 +132,7 @@ paper-dropdown-menu /deep/ core-icon {
   box-sizing: border-box;
   left:50%;
   margin-left:-4px;
+  z-index: 
 }
 
 .add-button { /* container for add button */
@@ -205,6 +208,7 @@ paper-dropdown-menu /deep/ core-icon {
   border-radius: 3px;
   box-sizing: border-box;
   transform: translate(0px,0px);
+  z-index: 100;
 }
 
 .node .description { /* description of step (only shows when closed) */
@@ -213,7 +217,11 @@ paper-dropdown-menu /deep/ core-icon {
   left: 30px;
   min-width: 300px;
   margin-top: -2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
 }
+
 
 .collapsed /deep/ ::content * { /* hides the content of the .node when collapsing */
   opacity: 0;
