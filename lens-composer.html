@@ -197,10 +197,7 @@
         _createNewNode: function(name, type, id, track){
           var self = this;
           var newEl = document.createElement(name);
-          console.log(name);
-          console.log(type);
-          console.log(id);
-          console.log(track);
+          
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.componentList = self.componentList.filter(function(component){
@@ -291,8 +288,7 @@
             console.log("CONNECT NODES");
             self.tracks = [];
             for (var ind=0; ind<self._numTracks; ind++){
-            // console.log(ind);
-            // console.log(self._numTracks);
+            
               (function(){
 
                   var trackNodes = self.nodes.filter(function(node){
