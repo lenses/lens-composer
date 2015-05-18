@@ -84,7 +84,8 @@
           <!-- Node itself (collpased as circle or expanded as box) -->
           <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" data-node-id="{{node.id}}" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
             <template if="{{!node.opened}}">
-              <span class="description">{{node.tag.componentName}}</span>
+              <span class="component-name">{{node.tag.componentName}}</span>
+              <span class="notes">{{node.tag.notes}}</span>
             </template>
             <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6"> 
               <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}" data-type="{{node.type}}"></core-icon>
@@ -689,7 +690,7 @@
               var interval = setInterval(function(){
                 self._getJoinPosition(node.join.source, node.id);
                 i++;
-                if(i > 100) {
+                if(i > 200) {
                   clearInterval(interval);
                 }
               },10);

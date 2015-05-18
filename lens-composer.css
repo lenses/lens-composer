@@ -211,7 +211,7 @@ paper-dropdown-menu /deep/ core-icon {
   z-index: 100;
 }
 
-.node .description { /* description of step (only shows when closed) */
+.node .component-name { /* name of component in step(only shows when closed) */
   position: absolute;
   display: inline;
   left: 30px;
@@ -221,6 +221,17 @@ paper-dropdown-menu /deep/ core-icon {
   letter-spacing: 1px;
   font-size: 0.85em;
 }
+
+.node .notes { /* description of step (only shows when closed) */
+  position: absolute;
+  display: inline;
+  left: 30px;
+  min-width: 300px;
+  margin-top: 15px;
+  font-style: italic;
+  font-size: 0.75em;
+}
+
 
 
 .collapsed /deep/ ::content * { /* hides the content of the .node when collapsing */
