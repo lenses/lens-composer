@@ -639,9 +639,7 @@
 
           var type =fromNode.track < toNode.track ? "left" : "right";
           var distance = toNode.track - fromNode.track;
-
-          console.log(type);  
-
+          
           if (type==='left' && distance > 1){
             self.trackShiftLeft(toNode.track, distance);
           }
@@ -650,7 +648,7 @@
             source: joinFromNodeId,
             type: type,
             top: Math.min(fromDiv.offsetTop, toDiv.offsetTop) + 8 +'px', // offset by 8px, half the width of the circle
-            left: fromDiv.offsetLeft + (fromDiv.offsetWidth / 2) - 2 + 'px', // offset by half the width of div less 2px for border
+            left: fromDiv.offsetLeft + (fromDiv.offsetWidth / 2) + (fromNode.track*100) - 2 + 'px', // offset by half the width of div less 2px for border
             width: '100px', // distance between tracks is set at 100
             height: Math.abs(toDiv.offsetTop - fromDiv.offsetTop) + 'px',
           };
@@ -681,9 +679,9 @@
             if(node.join){
               // Constantly recalculate position while nodes are opening/closing (~6s);
               var interval = setInterval(function(){
-                i++;
                 self._getJoinPosition(node.join.source, node.id);
-                if(i === 60) {
+                i++;
+                if(i > 100) {
                   clearInterval(interval);
                 }
               },10);
