@@ -190,9 +190,13 @@
 
           this.fire("th-theme-changed", this.theme);
         },
-        _createNewNode: function(name, type, id){
+        _createNewNode: function(name, type, id, track){
           var self = this;
           var newEl = document.createElement(name);
+          console.log(name);
+          console.log(type);
+          console.log(id);
+          console.log(track);
           newEl.id = id || self.generateUniqueId(name);
           newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
           newEl.componentList = self.componentList.filter(function(component){
@@ -204,7 +208,8 @@
               if (component.type =='input'){
                 return false;
               }
-              if (component.type == 'join' && self._numTracks < 2){
+              // Only show join component option when there are multiple tracks, but not on the first track
+              if (component.type == 'join' && (self._numTracks < 2 || track === 0)){ 
                 return false;
               }
               return true;
@@ -218,7 +223,7 @@
           var self = this,
               type = selection.dataset.nodeType,
               track = parseInt(selection.dataset.track),
-              newEl = self._createNewNode('lens-node', type);
+              newEl = self._createNewNode('lens-node', type, '', track);
           
           // Every time a new track is added, adjust trackShift
           if (type === 'input'){
@@ -688,13 +693,13 @@
               },10);
             }
           })
-        },
-        shiftTrackLeft: function(track, distance){
-          var self = this;
-          self.tracks[track].forEach(function(node){
-            node.moveToTrack = node.track - distance;
-          })
-          console.log(self.nodes);
+        // },
+        // shiftTrackLeft: function(track, distance){
+        //   var self = this;
+        //   self.tracks[track].forEach(function(node){
+        //     node.moveToTrack = node.track - distance;
+        //   })
+        //   console.log(self.nodes);
           // TODO: 
           // - change the track in each of the nodes
           // - rearrange order of nodes? (to change vertical position)
