@@ -639,9 +639,10 @@
 
           var type =fromNode.track < toNode.track ? "left" : "right";
           var distance = toNode.track - fromNode.track;
-          
+
           if (type==='left' && distance > 1){
-            self.trackShiftLeft(toNode.track, distance);
+            // Thinking about rearranging tracks to be adjacent to one another if join ones that are far apart? 
+            // self.trackShiftLeft(toNode.track, distance);
           }
 
           toNode.join = {
@@ -649,7 +650,7 @@
             type: type,
             top: Math.min(fromDiv.offsetTop, toDiv.offsetTop) + 8 +'px', // offset by 8px, half the width of the circle
             left: fromDiv.offsetLeft + (fromDiv.offsetWidth / 2) + (fromNode.track*100) - 2 + 'px', // offset by half the width of div less 2px for border
-            width: '100px', // distance between tracks is set at 100
+            width: distance * 100 + 'px', // distance between tracks is set at 100
             height: Math.abs(toDiv.offsetTop - fromDiv.offsetTop) + 'px',
           };
           toNode.join.styles = self._getJoinStyles(toNode.join);
