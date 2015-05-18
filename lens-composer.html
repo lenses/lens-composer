@@ -184,6 +184,10 @@
             self._getJoinPosition(joinFromNodeId, joinToNodeId);
           })
 
+          window.addEventListener('resize',function(){
+            self.updateJoins();
+          })
+
         },
         updateTheme: function(){
           window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
