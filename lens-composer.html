@@ -69,7 +69,7 @@
 
     <!-- Nodes -->
     <template if="{{nodes.length}}">
-      <div id="nodeContainer" on-click="{{_collapseNodes}}" style="{{tracks | _calculateTrackShift}};">                
+      <div id="nodeContainer" on-click="{{_collapseNodes}}" style="margin-bottom: {{_scrollMargin}}px; {{tracks | _calculateTrackShift}};">                
         <template repeat="{{node, index in nodes}}">
 
           <!-- Line before the step -->
@@ -337,8 +337,8 @@
           // Expand core-collapse and div
           var node = self.nodes[selection.dataset.index];
           node.opened = true;
+
           selection.classList.remove('collapsed');
-          
           self._scrollToNode(nodeId);
           
           self.updateJoins();
@@ -368,7 +368,7 @@
             node.classList.add('collapsed');
           })
 
-
+          self._scrollMargin = 0;
           self.updateJoins();
  
         },
@@ -592,14 +592,11 @@
         },
         _calculateTrackShift: function(tracks){
           var self = this;
-          var scrollMargin = window.innerHeight;
 
           if (tracks){
             self.trackShift = -(tracks.length - 1)*50;
-            return "transform: translate("+self.trackShift+"px,0px); margin-bottom:"+scrollMargin+"px;";
-          } else {
-            return "margin-bottom:"+scrollMargin+"px;";
-          }
+            return "transform: translate("+self.trackShift+"px,0px);";
+          } 
         },
         _calculateNodeShift: function(opened, track){
           var self = this;
@@ -613,6 +610,8 @@
         },
         _scrollToNode: function(nodeId){
           var self = this;
+          self._scrollMargin = window.innerHeight;
+
           if (nodeId){
             // Delay because position depends on other nodes collapsing, which takes 0.4s, so wait until that is finished
             setTimeout(function(nodeId){
