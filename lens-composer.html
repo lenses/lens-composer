@@ -87,7 +87,7 @@
               <span class="component-name">{{node.tag.componentName}}</span>
               <span class="notes">{{node.tag.notes}}</span>
             </template>
-            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6"> 
+            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6" on-core-collapse-open="{{resizeComponent}}" data-node-id="{{node.id}}"> 
               <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}" data-type="{{node.type}}"></core-icon>
               <content select="#{{node.id}}"></content>
             </core-collapse>
@@ -164,7 +164,7 @@
           // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
           // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
           // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
-      ],
+        ],
         ready: function(){
           var self = this;
           smoothScroll.init(self._scrollOptions);
@@ -177,7 +177,6 @@
           }
 
           self.addEventListener('lens-join', function(e){
-            console.log("LENS JOIN");
             var res = e.detail,
                 track = self.tracks[res.joinFromTrackIndex];
                 joinToNodeId = res.joinToNodeId,
@@ -188,6 +187,10 @@
 
           window.addEventListener('resize',function(){
             self.updateJoins();
+          })
+
+          self.addEventListener('lens-node-output-changed', function(e){
+            self._connectNodes();
           })
 
         },
@@ -258,7 +261,6 @@
           self._scrollToNode(newEl.id);
           
           self._connectNodes();
-
         },
         _deleteNode: function(e, detail, selection){
           var self = this,
@@ -329,19 +331,17 @@
           // Prevent click event from bubbling up to nodeContainer (which collapses all)
           e.stopPropagation(); 
 
-          
           // Collapse all nodes
           self._collapseNodes();
 
           // Expand core-collapse and div
-          self.nodes[selection.dataset.index].opened = true;
+          var node = self.nodes[selection.dataset.index];
+          node.opened = true;
           selection.classList.remove('collapsed');
           
           self._scrollToNode(nodeId);
-          // setTimeout(function(){
-            self.updateJoins();
-          // },600)
           
+          self.updateJoins();
           
         },
         _expandNodes: function(e){
@@ -696,19 +696,20 @@
               },10);
             }
           })
-        // },
-        // shiftTrackLeft: function(track, distance){
-        //   var self = this;
-        //   self.tracks[track].forEach(function(node){
-        //     node.moveToTrack = node.track - distance;
-        //   })
-        //   console.log(self.nodes);
-          // TODO: 
-          // - change the track in each of the nodes
-          // - rearrange order of nodes? (to change vertical position)
-          // - reconnect nodes
-
-
+        },
+        resizeComponent: function(e, detail, selection){
+          var self = this;
+          var nodeId = selection.dataset.nodeId;
+          var node = nodeId ? self.querySelector('#'+nodeId) : "";
+          if (node && node.type === 'visualize'){
+            if (node.component && node.component.resize){
+              // setTimeout(function(){
+                node.component.resize();
+              node.component.animate();
+            // },selection.duration*100)
+              
+            }
+          }
         }
       });
 
