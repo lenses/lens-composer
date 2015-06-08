@@ -9,7 +9,7 @@
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 
 
-<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor theme prevState">
+<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor theme prevState output">
   <core-style ref="theme"></theme>
   <template>
     <link rel="stylesheet" href="lens-composer.css">
@@ -130,6 +130,7 @@
           updateURL: false, // Boolean. Whether or not to update the URL with the anchor hash on scroll
           offset: 85 // Pixels by which to offset the anchor to the top of the screen
         },
+        output: [],
         nodes: [],
         observe: {
           prevState: 'loadLens',
@@ -171,7 +172,7 @@
           self.fire('lens-composer-ready', self)
           self.themes = window.Themes;
           self.themeNames = Object.keys(self.themes);
-
+          
           if (self.prevState){
             self.loadLens(self.prevState);
           }
@@ -191,6 +192,7 @@
 
           self.addEventListener('lens-node-output-changed', function(e){
             self._connectNodes();
+            self.setOutput();
           })
 
         },
@@ -421,6 +423,7 @@
             return newNode;
           })
 
+
           var finalState = {
             theme: self.theme,
             trackShift: self.trackShift,
@@ -430,6 +433,12 @@
           // TEMP -- only when DB returns stringified array
           // return JSON.stringify(nodes);
           return finalState;
+        },
+        setOutput: function(){
+          var self = this;
+          self.output = self.tracks.map(function(track){
+            return track[track.length-1].tag.output;
+          });
         },
 
         loadLens: function(){
