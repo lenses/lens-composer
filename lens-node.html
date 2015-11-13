@@ -1,0 +1,57 @@
+<link rel="import" href="../polymer/polymer.html"> 
+
+
+
+<dom-module id="lens-node">
+    <style>
+      :host {
+        
+      }
+
+
+    </style>
+    <template>
+    
+      <template is="dom-if" if="{{_isInput(type)}}">
+        <div>input node</div>
+      </template>
+      <template is="dom-if" if="{{_isTransform(type)}}">
+        <div>transform node</div>
+      </template>
+      <template is="dom-if" if="{{_isVisual(type)}}">
+        <div>visual node</div>
+      </template>
+    </template>
+  
+  <script>
+    Polymer({
+      is: 'lens-node',
+      properties: {
+        type: {
+          type: String
+        }
+        
+      },
+      ready: function(){
+      },
+
+      // Methods for validating type in template
+      _isInput: function(type){
+        if (type === 'input'){
+          return true;
+        }
+      },
+      _isTransform: function(type){
+        if (type === 'transform'){
+          return true;
+        }
+      },
+      _isVisual: function(type){
+        if (type === 'visualize'){
+          return true;
+        }
+      }
+     
+    });
+  </script>
+</dom-module>

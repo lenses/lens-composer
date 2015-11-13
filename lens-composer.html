@@ -1,725 +1,122 @@
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../th-theme/th-theme.html">
-<link rel="import" href="../lens-node/lens-node.html">
-<link rel="import" href="../core-ajax/core-ajax.html">
-<link rel="import" href="../core-icons/image-icons.html">
-<link rel="import" href="../core-icons/editor-icons.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../polymer/polymer.html"> 
+<link rel="import" href="lens-node.html"> 
+
+<!--
+
+A component used to create new lenses, by connecting components and passing data through them.
+
+Example:
+
+    <lens-composer></lens-composer>
+
+@demo
+-->
+
+<dom-module id="lens-composer">
+    <style>
+      :host {
+        display: block;
+      }
 
 
-<polymer-element name="lens-composer" attributes="componentList lensTitle lensAuthor theme prevState output">
-  <core-style ref="theme"></theme>
-  <template>
-    <link rel="stylesheet" href="lens-composer.css">
+    </style>
+    <template>
+      <template is="dom-repeat" items="{{nodes}}" as="node">
 
-
-    <!-- Title and Author fields -->
-    <h1><paper-input label="Title of Lens" value="{{lensTitle}}"></paper-input></h1>
-    <h3><paper-input label="Your Name" value="{{lensAuthor}}"></paper-input></h3>
-    
-    <!-- Theme selector -->
-    <div class="theme-selector">
-      <paper-dropdown-menu  label="Choose a theme">
-        <template  if="{{theme}}">
-            <div class="selected-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
-               <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
-               <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
-            </div>
-        </template>
-        <paper-dropdown class="dropdown">
-          <core-selector selected="{{theme}}" valueAttr="label">
-            <template repeat="{{theme in themeNames}}" >
-                <div class="dropdown-item" label="{{theme}}" style="background-color: {{themes[theme].background}}; color: {{themes[theme].foreground1}}; font-family: {{themes[theme].font}}">{{theme}} 
-                 <li class="swatch" style="background-color:{{themes[theme].accent0}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent1}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent2}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent3}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent5}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent6}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent7}}"></li>
-                 <li class="swatch" style="background-color:{{themes[theme].accent8}}"></li>
-                </div>
-            </template>
-          </core-selector>
-        </paper-dropdown>
-      </paper-dropdown-menu>
-    </div>
-
-    <template if="{{nodes.length}}">
-      <div class="utility-buttons">
-        <button on-click="{{_addTrack}}" data-node-type="input" data-index="{{nodes.length}}"> Add new data set</button>
-      </div>
+        <lens-node id="{{node.id}}" type="{{node.type}}"></lens-node>
+      </template>
     </template>
-
-    <!-- Starting state with 'add' button -->
-    <template if="{{!nodes.length}}">
-      
-      <div class="add-button">
-        <div class="icon" ><core-icon class="add-icon add-icon-start" data-node-type="input" icon="add" data-track="0" data-index="0" on-click="{{_addTrack}}"></core-icon></div>
-      </div>
-    </template>
-
-    <!-- Nodes -->
-    <template if="{{nodes.length}}">
-      <div id="nodeContainer" on-click="{{_collapseNodes}}" style="margin-bottom: {{_scrollMargin}}px; {{tracks | _calculateTrackShift}};">                
-        <template repeat="{{node, index in nodes}}">
-
-          <!-- Line before the step -->
-          <template if="{{index > 0}}">
-            <div class="link track{{node.track}}"> <!-- offset based on track -->
-              <template if="{{node.type !='input'}}">
-                <div class="line"></div> <!-- absolutely position in middle of div --> 
-              </template>
-            </div>
-          </template>  
-
-          <!-- Node itself (collpased as circle or expanded as box) -->
-          <div id="step-{{index}}" class="node {{node | collapseFilter}} {{node.tag.type}} track{{node.track}}" data-target="collapse-node" data-node-id="{{node.id}}" on-click="{{_expandSelected}}" data-index="{{index}}"  style="{{_calculateNodeShift(node.opened, node.track)}};">
-            <template if="{{!node.opened}}">
-              <span class="component-name">{{node.tag.componentName}}</span>
-              <span class="notes">{{node.tag.notes}}</span>
-            </template>
-            <core-collapse id="collapse-node" opened="{{node.opened}}" duration="0.6" on-core-collapse-open="{{resizeComponent}}" data-node-id="{{node.id}}"> 
-              <core-icon class="delete-button" icon="close" data-index="{{index}}" on-click="{{_deleteNode}}" data-type="{{node.type}}"></core-icon>
-              <content select="#{{node.id}}"></content>
-            </core-collapse>
-          </div>
-
-          
-          <!-- Line after the step -->
-          <div class="link track{{node.track}}"> <!-- offset based on track --> 
-            <div class="line"></div>  <!-- absolutely position in middle of div -->
-          </div>
-
-          <!-- Add button after the step if the track has not been joined to another -->
-           <template if="{{!node.endOfTrack}}">
-             <div class="add-button track{{node.track}}" >
-                <core-icon class="add-icon" icon="add" data-index="{{index+1}}" data-track="{{node.track}}" on-click="{{_addNode}}"></core-icon>
-             </div>
-          </template>
-          <!-- Otherwise create a join line to another track -->
-          <template if="{{node.join}}">
-            <div id="join-{{node.id}}" style="{{node.join.styles}}"></div>
-          </template>
-        </template>
-
-      </div>
-      
-    </template>
-  </template>
-  <script src="../smooth-scroll/dist/js/smooth-scroll.js"></script>
+  
   <script>
-
-      Polymer('lens-composer', {
-        // lensTitle: 'Example Lens',
-        // lensAuthor: 'Nisha Batra',
-        // theme: 'lenses',
-        _uniqueCounter: 0,
-        _numTracks: 0,
-        _scrollOptions: {
-          speed: 800, // Integer. How fast to complete the scroll in milliseconds
-          easing: 'easeInOutCubic', // Easing pattern to use
-          updateURL: false, // Boolean. Whether or not to update the URL with the anchor hash on scroll
-          offset: 85 // Pixels by which to offset the anchor to the top of the screen
+    Polymer({
+      is: 'lens-composer',
+      properties: {
+        /**
+         * prevState is an object containing data required to rebuild a lens.
+         * Example:
+         *   {
+         *     nodes: [{ 'type': 'input', 'id':'lens-node-0',  'componentName': 'lens-viz-g-bar'}],
+         *   }
+         * @type {Object}
+         */
+        prevState: {
+          type: Object,
+          value: function(){ return {     nodes: [
+              { 'type': 'input', 'id':'lens-node-0',  'componentName': 'lens-viz-g-bar'},
+              { 'type': 'transform', 'id':'lens-node-1',  'componentName': 'lens-viz-g-bar'}
+            ] }; }
         },
-        output: [],
-        nodes: [],
-        observe: {
-          prevState: 'loadLens',
-          theme: "updateTheme"
+        nodes: {
+          type: Array,
+          value: function(){ return []; }
         },
-        componentList: [
-          {name:'lens-data-table', friendly: 'Data table', type: 'input'},
-          {name:'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
-          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
-          {name:'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
-          
-          {name:'lens-data-find-replace', friendly: 'Find and Replace', type: 'transform'},
-          {name:'lens-data-convert-date', friendly: 'Convert Date Formats', type: 'transform'},
-          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
-          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
-          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
-          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
-          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
-          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
-          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
-          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
-
-          {name:'lens-data-zip', friendly: 'Join Tracks', type: 'join'},
-
-          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
-          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
-          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
-          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
-          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
-          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
-          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'}
-          // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
-          // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
-          // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
-        ],
-        ready: function(){
-          var self = this;
-          smoothScroll.init(self._scrollOptions);
-          self.fire('lens-composer-ready', self)
-          self.themes = window.Themes;
-          self.themeNames = Object.keys(self.themes);
-          
-          if (self.prevState){
-            self.loadLens(self.prevState);
-          }
-
-          self.addEventListener('lens-join', function(e){
-            var res = e.detail,
-                track = self.tracks[res.joinFromTrackIndex];
-                joinToNodeId = res.joinToNodeId,
-                joinFromNodeId = track[track.length - 1].id;
-            
-            self._getJoinPosition(joinFromNodeId, joinToNodeId);
-          })
-
-          window.addEventListener('resize',function(){
-            self.updateJoins();
-          })
-
-          self.addEventListener('lens-node-output-changed', function(e){
-            self._connectNodes();
-            self.setOutput();
-          })
-
-        },
-        updateTheme: function(){
-          window.CoreStyle.g.theme = this.theme ? Themes[this.theme] : window.CoreStyle.g.theme;
-
-          this.fire("th-theme-changed", this.theme);
-        },
-        _createNewNode: function(name, type, id, track){
-          var self = this;
-          var newEl = document.createElement(name);
-        
-          newEl.id = id || self.generateUniqueId(name);
-          newEl.type = type; // this should be set when the element is created -- otherwise it doesnt behave the same way
-          newEl.componentList = self.componentList.filter(function(component){
-            if (type =='input'){
-              if (component.type =='input'){
-                return true;
-              }
-            } else {
-              if (component.type =='input'){
-                return false;
-              }
-              // Only show join component option when there are multiple tracks, but not on the first track
-              if (component.type == 'join' && (self._numTracks < 2 || track === 0)){ 
-                return false;
-              }
-              return true;
-            }
-          })
-          self.appendChild(newEl);
-          return newEl;
-        },
-        _addNode: function(e, detail, selection){
-          console.log("add node");
-          var self = this,
-              type = selection.dataset.nodeType,
-              track = parseInt(selection.dataset.track),
-              newEl = self._createNewNode('lens-node', type, '', track);
-          
-          // Every time a new track is added, adjust trackShift
-          if (type === 'input'){
-            self.trackShift -= 50;
-          }
-
-          // Prevent click event from bubbling up to nodeContainer (which collapses all)
-          e.stopPropagation(); 
-          track = track >= 0 ? track : self._numTracks-1;
-          
-          // Collapse all nodes
-          self._collapseNodes();
-
-          var index = selection.dataset.index;
-         console.log("track:" + track);
-         console.log("index:" + index);
-
-          var newNode = { 
-            name: 'lens-node',
-            id: newEl.id,
-            tag: newEl,
-            type: type,
-            opened: true,
-            track: track
-          }
-
-          self.nodes.splice(index,0,newNode); // determine correct place to insert node
-          
-          self._scrollToNode(newEl.id);
-          
-          self._connectNodes();
-        },
-        _deleteNode: function(e, detail, selection){
-          var self = this,
-              index = selection.dataset.index,
-              node = self.nodes[index];
-
-          if (selection.dataset.type === 'input'){
-            if (confirm('By removing this step, you will delete the whole track. Are you sure you want to do this?')) {
-              var trackNum = node.track;
-              self._deleteTrack(trackNum);
-              // self.removeChild(self.nodes[index].tag);
-              // self.nodes.splice(index, 1)
-            }
-          } else {
-            if (confirm('Are you sure you want to remove this step?')) {
-              if (node.type === 'join'){
-                // TODO: find node it's connected to and set endOfTrack to false;
-              }
-              self.removeChild(node.tag);
-
-              self.nodes.splice(index, 1)
-            }  
-          }
-          
-          this._connectNodes();
-        },
-        _connectNodes: function(){
-            var self = this;
-            console.log("CONNECT NODES");
-            self.tracks = [];
-            for (var ind=0; ind<self._numTracks; ind++){
-            
-              (function(){
-
-                  var trackNodes = self.nodes.filter(function(node){
-                    return ind == node.track;
-                  })
-
-                  if (trackNodes.length){
-                    console.log(trackNodes);
-                    self.tracks.push(trackNodes);
-                  }
-
-                  if(trackNodes.length > 1){
-                    for (var i=1; i<trackNodes.length; i++){
-                    (function() {
-
-                        var source = trackNodes[i-1].tag,
-                            target = trackNodes[i].tag;
-                        if (source && target){
-                          var observer = new PathObserver(source, 'output');     
-                          observer.open(function(newValue, oldValue) {
-                             target.input = newValue;
-                          });
-                          target.input = source.output; 
-                        }
-                        
-                      })();
-                    }
-                  }
-            })();
-          }
-
-        },
-        _expandSelected: function(e, detail, selection){
-          var self = this;
-          var nodeId = selection.dataset.nodeId;
-          // Prevent click event from bubbling up to nodeContainer (which collapses all)
-          e.stopPropagation(); 
-
-          // Collapse all nodes
-          self._collapseNodes();
-
-          // Expand core-collapse and div
-          var node = self.nodes[selection.dataset.index];
-          node.opened = true;
-
-          selection.classList.remove('collapsed');
-          self._scrollToNode(nodeId);
-          
-          self.updateJoins();
-          
-        },
-        _expandNodes: function(e){
-          var self = this;
-          var nodeContainers = self.shadowRoot.querySelectorAll('.node');
-  
-          self.nodes.forEach(function(node,i){
-            node.opened = true;
-          });
-
-          [].forEach.call(nodeContainers, function(node, i){
-            node.classList.remove('collapsed');
-          })
-        },
-        _collapseNodes: function(e){
-          var self = this,
-              nodeContainers = self.shadowRoot.querySelectorAll('.node');
-  
-          self.nodes.forEach(function(node,i){
-            node.opened = false;
-          });
-
-          [].forEach.call(nodeContainers, function(node, i){
-            node.classList.add('collapsed');
-          })
-
-          self._scrollMargin = 0;
-          self.updateJoins();
- 
-        },
-        generateUniqueId: function(elName){
-          var self = this,
-              uniqueId = elName + '-' + self._uniqueCounter;
-          
-          self._uniqueCounter+= 1;
-
-          return uniqueId;
-        },
-        deselectFinalResultAll: function(){
-          var self= this;
-
-          for(i=0;i<self.nodes.length;i++){
-            self.nodes[i].tag.finalResult = false;    
-          }
-        },
-        _selectDefaultFinalResult: function(){
-          var self = this;
-          var finalResult = self.nodes.filter(function(item){ return item.tag.finalResult });
-          if (!finalResult.length){
-            var visualNodes = self.nodes.filter(function(item){ return item.tag.type == "visualize"});  
-            if (visualNodes.length){
-              visualNodes[visualNodes.length - 1].tag.finalResult = true;
-              visualNodes[visualNodes.length - 1].finalResult = true;
-            }
-            
-          }
-        },
-        dumpData: function(){
-          var self = this;
-          self._selectDefaultFinalResult();
-
-          var nodes = self.nodes.map(function(node){
-            var newNode = {},
-                keys = Object.keys(node);
-            
-            keys.forEach(function(key) {
-               newNode[key] = node[key];
-            });
-
-            for(var attribute in newNode.tag.publish){
-              newNode[attribute] = newNode.tag[attribute];
-            }
-            
-            self._addComponentInfoToNode(newNode);
-            self._removeHTMLfromNode(newNode);
-            
-            return newNode;
-          })
-
-
-          var finalState = {
-            theme: self.theme,
-            trackShift: self.trackShift,
-            nodes: nodes
-          };
-
-          // TEMP -- only when DB returns stringified array
-          // return JSON.stringify(nodes);
-          return finalState;
-        },
-        setOutput: function(){
-          var self = this;
-          self.output = self.tracks.map(function(track){
-            return track[track.length-1].tag.output;
-          });
-        },
-
-        loadLens: function(){
-          var self = this;
-
-          if(typeof(self.prevState)=="string"){
-            self.prevState = JSON.parse(self.prevState);
-          } 
-
-          // Apply settings
-          self.nodes = self.prevState.nodes;
-          // self.lensTitle = lensData.title;
-          // self.lensAuthor = lensData.author;
-          self.theme = self.prevState.theme;
-          self.trackShift = self.prevState.trackShift;
-          self._setUniqueCounter();
-          
-          // Recreate nodes and components
-          self.buildNodes(self.nodes);
-          self.updateJoins();
-            
-        },
-        resetLens: function(){
-          var self = this;
-
-          // Remove nodes
-          self.nodes.forEach(function(node){
-            self.removeChild(node.tag);
-          });
-
-          // Reset defaults
-          self.nodes = [];
-          self.tracks = [];
-          self._numTracks = 0;
-          self._uniqueCounter = 0;
-          self.lensTitle = "";
-          self.lensAuthor = "";
-          self.theme = "";
-        },
-        _parseNodes: function(){
-          var self = this;
-          if(typeof(self.nodes)=="string"){
-            self.nodes = JSON.parse(self.nodes);
-          }
-        },
-        buildNodes: function(nodes){
-          var self = this;
-
-          var numNodes = nodes.length;
-
-          for(var i=0;i<numNodes; i++){
-            var node = nodes[i],
-                nodeExists = document.querySelector('#'+node.id) ? true : false;
-
-            if (!nodeExists){
-              console.log("node does not exist, building");
-              
-              if(node.type == 'input'){ self._numTracks++; }
-
-              node.tag = self._createNewNode(node.name, node.type, node.id);
-              
-              // Set all the saved attrs for the node
-              for(var attr in node.tag.publish){
-                node.tag[attr] = node[attr];
-              }
-
-              if (i>0){
-                self._connectNodes();
-              }
-              if (node.componentName){ 
-                var componentState = node.componentState ? node.componentState : null; 
-                node.tag.createElementFromSavedData(node.componentName, componentState);
-              }
-            } else {
-              console.log("node exists");
-              console.log(node);
-            }
-          }
-
-        },
-        getFinalResult: function(){
-          var self = this;
-          for (var i=0; i<self.nodes.length; i++){
-            var node =self.nodes[i].tag;
-            if (node.finalResult){
-              var componentState = self._getComponentState(node.component),
-                  componentName = node.component.tagName.toLowerCase();
-              var finalResult = {  
-                        'componentName': componentName,
-                        'componentState': componentState
-                      };
-              return finalResult;
-            }
-          }
-
-          return;
-        },
-        collapseFilter: function(node){
-          return node.opened ? "opened" : "collapsed";
-        },
-        _addTrack: function(e, detail, selection){
-          this._numTracks++;
-
-          this._addNode(e, detail, selection);
-        },
-        _deleteTrack: function(trackNum){
-          var self = this;
-          self._numTracks--;
-          self.tracks.splice((trackNum),1);
-          
-          self.nodes.forEach(function(node, i){ 
-            if (node.track == trackNum){ 
-              self.removeChild(node.tag);
-              self.nodes[i] = null; // set to null temporarily to not affect indices inside loop
-            } else if (node.track > trackNum){ 
-              node.track--;
-            }   
-          })
-          
-          self.nodes = self.nodes.filter(function(node){ return node;}); // remove nulls from array
-          
-        },
-        _addComponentInfoToNode: function(node){
-          var self = this;
-          if(node.tag.component){
-            node.componentName = node.tag.component.tagName.toLowerCase();
-            node.componentState = node.tag.type === "input" ? self._getComponentState(node.tag.component) : self._getComponentStateMinimal(node.tag.component);
-          }
-        },
-        _removeHTMLfromNode: function(node){
-          delete node.tag;
-        },
-        _getComponentState: function(component){
-          var currentState = {};
-          for(var attribute in component.publish){
-            // if(attribute !== 'output'){
-              currentState[attribute] = component[attribute];
-            // }
-          }
-          return currentState;
-        },
-        _getComponentStateMinimal: function(component){
-          var currentState = {};
-          for(var attribute in component.publish){
-            if(attribute !=='input' && attribute !=='chartData' && attribute !== 'output'){
-              currentState[attribute] = component[attribute];
-            }
-          }
-          return currentState;
-        },
-        _setUniqueCounter: function(){
-          var self = this;
-      
-          self.nodes.forEach(function(node){
-            var id = parseInt(node.id.match(/\d+/)[0]);
-            if(id >= self._uniqueCounter){
-              self._uniqueCounter = id + 1;
-            }
-          })
-        },
-        _calculateTrackShift: function(tracks){
-          var self = this;
-
-          if (tracks){
-            self.trackShift = -(tracks.length - 1)*50;
-            return "transform: translate("+self.trackShift+"px,0px);";
-          } 
-        },
-        _calculateNodeShift: function(opened, track){
-          var self = this;
-          if (!self.trackShift){
-            self._calculateTrackShift(self.tracks);
-          }
-          if (opened){
-            return "transform: translate("+ (self.trackShift * -1)+"px,0px);";
-          } 
-          
-        },
-        _scrollToNode: function(nodeId){
-          var self = this;
-          self._scrollMargin = window.innerHeight;
-
-          if (nodeId){
-            // Delay because position depends on other nodes collapsing, which takes 0.4s, so wait until that is finished
-            setTimeout(function(nodeId){
-              var nodeId = '#' + nodeId;
-              var offsetTop = document.querySelector(nodeId).getBoundingClientRect().top;
-              var windowHeight = window.innerHeight;
-
-              if (offsetTop > windowHeight/2){
-                console.log("scroll down to "+ nodeId);
-                console.log(self._scrollOptions);
-                smoothScroll.animateScroll( null, nodeId, self._scrollOptions );  
-              }
-            }, 415, nodeId) 
-          }
-        },
-        _getJoinPosition: function(joinFromNodeId, joinToNodeId){
-          var self = this;
-          var fromNode, toNode, fromDiv, toDiv;
-          
-          // Find the node object from each id and update
-          self.nodes.forEach(function(node, i){
-            if (node.id === joinFromNodeId){
-              fromNode = node;
-              fromDiv = self.shadowRoot.querySelector('#step-'+i);
-              node.endOfTrack = true;
-            }
-            if (node.id === joinToNodeId){
-              toNode = node;
-              toDiv = self.shadowRoot.querySelector('#step-'+i);
-            }
-          })
-
-          var type =fromNode.track < toNode.track ? "left" : "right";
-          var distance = toNode.track - fromNode.track;
-
-          if (type==='left' && distance > 1){
-            // Thinking about rearranging tracks to be adjacent to one another if join ones that are far apart? 
-            // self.trackShiftLeft(toNode.track, distance);
-          }
-
-          toNode.join = {
-            source: joinFromNodeId,
-            type: type,
-            top: Math.min(fromDiv.offsetTop, toDiv.offsetTop) + 8 +'px', // offset by 8px, half the width of the circle
-            left: fromDiv.offsetLeft + (fromDiv.offsetWidth / 2) + (fromNode.track*100) - 2 + 'px', // offset by half the width of div less 2px for border
-            width: distance * 100 + 'px', // distance between tracks is set at 100
-            height: Math.abs(toDiv.offsetTop - fromDiv.offsetTop) + 'px',
-          };
-          toNode.join.styles = self._getJoinStyles(toNode.join);
-          
-        },
-        _getJoinStyles: function(joinObj){
-
-          var styles = "position: absolute;  border-radius: 10px;";
-              styles += "left:"+joinObj.left+";"; 
-              styles += "top:"+joinObj.top+";"; 
-              styles += "height:"+joinObj.height+";"; 
-              styles += "width:"+joinObj.width+";"; 
-              if (joinObj.type ==='left'){
-                styles += "border-bottom: 4px solid #eee; border-left: 4px solid #eee;";
-              } else {
-                styles += "border-top: 4px solid #eee; border-right: 4px solid #eee;";
-              }
-          
-          return styles;
-        },
-        updateJoins: function(){
-          var self = this; 
-          var i = 0;
-
-          // For every node with a join connected to it, recalculate the position
-          self.nodes.forEach(function(node){
-            if(node.join){
-              // Constantly recalculate position while nodes are opening/closing (~6s);
-              var interval = setInterval(function(){
-                self._getJoinPosition(node.join.source, node.id);
-                i++;
-                if(i > 200) {
-                  clearInterval(interval);
-                }
-              },10);
-            }
-          })
-        },
-        resizeComponent: function(e, detail, selection){
-          var self = this;
-          var nodeId = selection.dataset.nodeId;
-          var node = nodeId ? self.querySelector('#'+nodeId) : "";
-          if (node && node.type === 'visualize'){
-            if (node.component && node.component.resize){
-              // setTimeout(function(){
-                node.component.resize();
-              node.component.animate();
-            // },selection.duration*100)
-              
-            }
-          }
+        // INITIALIZE PRIVATE
+        _uniqueCounter: {
+          type: Number,
+          value: 0
         }
-      });
+        
+      },
+      listeners: {
 
+      },
+      attached: function(){
+        if (this.prevState){
+          this.loadLens(this.prevState);
+        }
+
+      },
+      loadLens: function(lensData){
+        var self = this;
+        // this.nodes = lensData.nodes;
+        lensData.nodes.forEach(function(node){
+          // var newNode = self.createNode(node.type, node.id);
+          
+          // node.id = newNode.id;
+          self.push('nodes', node);
+
+        })
+
+        console.log(this.nodes);
+
+
+        // Recreate a lens given the data.
+      },
+      clearLens: function(){
+        // Wipe the slate clean and start from scratch
+      },
+      addNewComponent: function(){
+        // Adds a new external component to the list
+      },
+      createNode: function(type, id, track){
+        // Creates a new lens-node
+        var newNode = document.createElement('lens-node');
+
+        newNode.id = id || this._generateUniqueId('lens-node');
+        newNode.type = type;
+        this.appendChild(newNode);
+        
+        return newNode;
+
+      },
+      addNode: function(){
+
+      },
+      deleteNode: function(){
+        // Deletes a lens-node
+      },
+      connectNodes: function(){
+        // Connects I/O of nodes 
+      },
+      _generateUniqueId: function(elName){
+        // Generates a unique id for lens-node
+        var uniqueId = elName + '-' + this._uniqueCounter;
+        
+        this._uniqueCounter+= 1;
+
+        return uniqueId;
+      }
+     
+    });
   </script>
-</polymer-element>
+</dom-module>

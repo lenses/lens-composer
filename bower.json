@@ -4,14 +4,11 @@
   "keywords": "seed, polymer, web-components",
   "main": "lens-composer.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.5.5",
-    "th-theme": "thelmanews/th-theme",
-    "lens-node": "lenses/lens-node",
-    "lens-input-elements": "lenses/lens-input-elements",
-    "lens-transform-elements": "lenses/lens-transform-elements",
-    "lens-visual-elements": "lenses/lens-visual-elements",
-    "paper-input": "polymer/paper-input#~0.5.5",
-    "paper-dropdown-menu": "polymer/paper-dropdown-menu#~0.5.5",
-    "smooth-scroll": "https://github.com/cferdinandi/smooth-scroll.git"
+    "iron-input": "polymerelements/iron-input#~1.0.3",
+    "polymer": "Polymer/polymer#^1.0.0"  
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
   }
 }
