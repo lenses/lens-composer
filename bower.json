@@ -5,7 +5,11 @@
   "main": "lens-composer.html",
   "dependencies": {
     "iron-input": "polymerelements/iron-input#~1.0.3",
-    "polymer": "Polymer/polymer#^1.0.0"  
+    "polymer": "Polymer/polymer#^1.0.0",
+    "paper-toolbar": "polymerelements/paper-toolbar#^1.0.0",
+    "iron-flex-layout": "polymerelements/iron-flex-layout#^1.0.0",
+    "lens-data-convert-date": "lenses/lens-data-convert-date#polymerOne",    
+    "lens-data-find-replace": "lenses/lens-find-replace-date#polymerOne"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

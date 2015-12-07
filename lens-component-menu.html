@@ -1,0 +1,127 @@
+<link rel="import" href="../polymer/polymer.html"> 
+
+<dom-module id="lens-component-menu">
+    <style>
+      :host {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .item {
+        padding: 10px;
+        display: inline-block;
+        background-color: #eee;
+        list-style: none;
+        position: relative;
+        margin: 10px;
+        border-radius: 200px;
+        cursor: pointer;
+      }
+
+
+    </style>
+    <template>
+      
+      <h2>Input Elements</h2>
+      <template is="dom-repeat" items="{{_filterByInput(componentList)}}" as="component">
+        <li class="item" on-click="addComponent" data-component-name$="{{component.name}}" data-component-type="input">{{component.friendly}}</li>
+      </template>
+      
+      <h2>Transform Elements</h2>
+      <template is="dom-repeat" items="{{_filterByTransform(componentList)}}" as="component">
+        <li class="item">{{component.friendly}}</li>
+      </template>
+      
+      <h2>Visual Elements</h2>
+      <template is="dom-repeat" items="{{_filterByVisual(componentList)}}" as="component">
+        <li class="item">{{component.friendly}}</li>
+      </template>
+      
+    </template>
+
+  <script>
+    Polymer({
+      is: 'lens-component-menu',
+      properties: {
+        componentList: {
+          type: Array,
+          value:  [
+          {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+          {name:'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
+          {name:'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          
+          {name:'lens-data-find-replace', friendly: 'Find and Replace', type: 'transform'},
+          {name:'lens-data-convert-date', friendly: 'Convert Date Formats', type: 'transform'},
+          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
+          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
+          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
+          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
+          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
+          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
+          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
+          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
+
+          {name:'lens-data-zip', friendly: 'Join Tracks', type: 'join'},
+
+          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
+          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
+          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
+          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
+          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'}
+          // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+        ]
+        }
+
+        
+      },
+      ready: function(){
+        
+        
+      },
+      addComponent: function(e){
+        
+        console.log({
+          'name': e.target.dataset.componentName,
+          'type': e.target.dataset.componentType,
+        });
+        this.fire('lens-add-element', {
+          'name': e.target.dataset.componentName,
+          'type': e.target.dataset.componentType,
+        })
+        
+      },
+      _filterByInput: function(componentList){
+        var inputs = componentList.filter(function(component){
+          if (component.type === 'input') {
+            return true;
+          }
+        });
+        console.log(inputs);
+        return inputs;
+
+      },
+      _filterByTransform: function(componentList){
+        return componentList.filter(function(component){
+          if (component.type === 'transform') {
+            return true;
+          }
+        });
+
+      },
+      _filterByVisual: function(componentList){
+        return componentList.filter(function(component){
+          if (component.type === 'visualize') {
+            return true;
+          }
+        });
+      }
+     
+    });
+  </script>
+</dom-module>

@@ -2,6 +2,7 @@
 <link rel="import" href="../paper-toolbar/paper-toolbar.html"> 
 <link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
 <link rel="import" href="lens-node.html"> 
+<link rel="import" href="lens-component-menu.html"> 
 
 <!--
 
@@ -21,6 +22,7 @@ Example:
         position: absolute;
         height: 100%;
         width: 100%;
+        font-family: sans-serif;
       }
 
       /* GENERAL STYLES */ 
@@ -90,6 +92,7 @@ Example:
 
       /* CONTROL PANEL STYLES */ 
       #control-panel {
+        display: inline-block;
         width: 20%;
         min-width: 200px;
         height: 100%;
@@ -97,6 +100,39 @@ Example:
         top: 0;
         overflow: hidden;
         border-right: 3px solid #eee;
+      }
+
+      /* MAIN PANEL STYLES */
+      #main {
+        width: 80%;
+        height: 100%;
+        overflow: hidden;
+        display: inline-block;
+        float: right;
+      }
+
+      #componentList {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 1;
+      }
+
+      #component {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 2;
+        background-color: white;
+      }
+
+      #component > ::content {
+        width: 100%;
+        height: 100%;
+      }
+
+      .hidden {
+        display: none;
       }
 
     </style>
@@ -115,14 +151,47 @@ Example:
 
       <!-- TRACKS -->
       <div id="control-panel" class="padded">
-        <div class="btn btn-outline padded">Add new track</div>
+        <template is="dom-if" if="{{nodes.length}}">
+          <div class="btn btn-outline padded" on-click="addTrack" data-node-type="input">Add new track</div>
+        </template>
+        
+        <template id="tracks" is="dom-repeat" items="{{nodes}}" as="node" observe="type tag.component.name">
+          <li>
+            <!-- <div class="step"></div> -->
+            <div on-click="_displayNode" data-node-index$="{{index}}">{{node.tag.component.name::component-name-changed}}</div>
+            <div>{{node.type}}</div>
+          </li>
+        </template>
+        <!-- <template is="dom-if" if="{{!nodes.length}}"> -->
+          <!-- <li on-click="_displayNode">+</li> -->
+        <!-- </template> -->
       </div>
+      
+      
 
       <!-- MAIN FRAME -->
-      <template is="dom-repeat" items="{{nodes}}" as="node">
+      <div id="main">
+        <template is="dom-repeat" items="{{nodes}}" as="node">
+          <div class$="lens-node"> <!-- TODO: make this observe changes in current node --> 
+            <content select="#{{node.id}}"></content>
+          </div>
+        </template>
+        <!-- <template is="dom-if" if="{{_currentNode}}">
+          <div id="component">
+            <content select="#{{_currentNode.id}}"></content>
+          </div>
+        </template> -->
+      </div>
 
-        <lens-node id="{{node.id}}" type="{{node.type}}"></lens-node>
-      </template>
+
+
+      <!-- HIDDEN LENS NODES -->
+      <div class="hidden">
+        <template is="dom-repeat" items="{{nodes}}" as="node">
+          <!-- <content select="#{{node.id}}"></content> -->
+          <!-- <lens-node id="{{node.id}}" type="{{node.type}}"></lens-node> -->
+        </template>
+      </div>
     </template>
   
   <script>
@@ -141,26 +210,58 @@ Example:
           type: Object,
           value: function(){ return {     nodes: [
               { 'type': 'input', 'id':'lens-node-0',  'componentName': 'lens-viz-g-bar'},
-              { 'type': 'transform', 'id':'lens-node-1',  'componentName': 'lens-viz-g-bar'}
+              { 'type': 'transform', 'id':'lens-node-1',  'componentName': 'lens-viz-g-map'}
             ] }; }
         },
         nodes: {
           type: Array,
-          value: function(){ return []; }
+          value: function(){ return []; },
+          notify: true
         },
         // INITIALIZE PRIVATE
         _uniqueCounter: {
           type: Number,
           value: 0
+        },
+        _currentNode: {
+          type: Object,
+          value: {},
+          notify: true,
+          observer: '_currentNodeChanged'
+        },
+        componentList: {
+          type: Array,
+         value: function(){
+          return [
+            {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+            {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+            {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'}
+          ];
+         } 
         }
-        
       },
       listeners: {
+        'lens-add-element': 'addNewComponent', // not functional
+        'component-name-changed': 'componentNameChanged' // not functional
 
       },
-      attached: function(){
-        if (this.prevState){
+      observers: {
+        'nodesChanged': 'nodesChanged(node.*)' // not functional
+      },
+      ready: function(){
+
+        if (this.prevState && this.prevState.nodes && this.prevState.nodes.length){
+      
           this.loadLens(this.prevState);
+        } else {
+          var newNode = this.createNode('input');
+          this._currentNode = {
+            type: newNode.type,
+            id: newNode.id,
+            tag: newNode
+          };
+          this.addNode(this._currentNode);   
+
         }
 
       },
@@ -174,16 +275,48 @@ Example:
           self.push('nodes', node);
 
         })
+    
+        // self._setUniqueCounter();
+          
+        // Recreate nodes and components
+        self.rebuildNodes(self.nodes);
+          
+      },
+      rebuildNodes: function(nodes){
+        var self = this;
+        nodes.forEach(function(node, i){
+          var nodeExists = document.querySelector('#'+node.id) ? true : false;
 
-        console.log(this.nodes);
+          if (!nodeExists){
+             console.log("node does not exist, building");
+             // if(node.type == 'input'){ self._numTracks++; }
+             node.tag = self.createNode(node.type, node.id);
+             
+             Polymer.dom(self).appendChild(node.tag);
 
+             // TODO: Set all the saved attrs for the node
+            if (i>0){
+              // self._connectNodes();
+            }
 
-        // Recreate a lens given the data.
+            if (node.componentName){ 
+              // TODO: recreate component w/state inside lens-node
+              // var componentState = node.componentState ? node.componentState : null; 
+              node.tag.createElementFromSavedData(node.componentName);
+              }
+          }
+        });
+        self.set('_currentNode',self.nodes[0]);
+
       },
       clearLens: function(){
         // Wipe the slate clean and start from scratch
       },
-      addNewComponent: function(){
+      addNewComponent: function(e, detail){
+        var self = this;
+        // var name = detail.name,
+
+        // self._currentNode.addComponent(detail.name, detail.type);
         // Adds a new external component to the list
       },
       createNode: function(type, id, track){
@@ -192,12 +325,18 @@ Example:
 
         newNode.id = id || this._generateUniqueId('lens-node');
         newNode.type = type;
-        this.appendChild(newNode);
+        // this.appendChild(newNode);
         
         return newNode;
 
       },
-      addNode: function(){
+      addNode: function(node){
+        console.log(node);
+        // this.appendChild(node.tag); 
+        Polymer.dom(this).appendChild(node.tag)
+        this.push('nodes', node); 
+
+        return node;
 
       },
       deleteNode: function(){
@@ -206,6 +345,9 @@ Example:
       connectNodes: function(){
         // Connects I/O of nodes 
       },
+      addTrack: function(){
+        // Create a new track
+      },
       _generateUniqueId: function(elName){
         // Generates a unique id for lens-node
         var uniqueId = elName + '-' + this._uniqueCounter;
@@ -213,6 +355,57 @@ Example:
         this._uniqueCounter+= 1;
 
         return uniqueId;
+      },  
+      // _isNodeSelected: function(nodeId){
+        
+      //   return this._currentNode.id === nodeId ? "" : "hidden";
+      // },
+      _displayNode: function(e){
+        var self = this,
+            index = e.target.dataset.nodeIndex;
+        this._currentNode.tag.classList.add('hidden');
+
+        // Set `selected` on all nodes to false    
+        // self.nodes.forEach(function(node, i){
+          // node.selected = false;
+        // })
+
+        // Select the correct node or create a new one
+        if (index || index == 0){
+          if (self.nodes[index]){
+            self.set('_currentNode', self.nodes[index]);
+            self._currentNode.tag.classList.remove('hidden');
+            // console.log(self._currentNode);
+            // self.set('_currentNode.selected', true);
+            // self.nodes[index].selected = true;
+          } else {
+            console.log("display component menu")
+            // TODO: if the button to add a new node is clicked, need to create it (after a component is selected?)
+          }
+        } else {
+          self.set('_currentNode', {});
+        }
+
+
+      },
+      componentNameChanged: function(){
+        console.log('componentNameChanged');
+        // this.notifyPath('node')
+        this.$.tracks.render(); // not functional
+      },
+      nodesChanged: function(node){
+        console.log('nodes changed');
+      },
+      isCurrent: function(node){
+        if (node.id === this._currentNode.id){
+          return "";
+        } else {
+          return "hidden";
+        }
+        
+      },
+      _currentNodeChanged: function(){
+
       }
      
     });

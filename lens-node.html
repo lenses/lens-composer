@@ -5,21 +5,63 @@
 <dom-module id="lens-node">
     <style>
       :host {
-        
+       display: inline-block; 
+      }
+
+      :host.hidden {
+        display: none;
       }
 
 
+       .item {
+        padding: 10px;
+        display: inline-block;
+        background-color: #eee;
+        list-style: none;
+        position: relative;
+        margin: 10px;
+        border-radius: 200px;
+        cursor: pointer;
+      }
+
     </style>
     <template>
-    
-      <template is="dom-if" if="{{_isInput(type)}}">
+   <!--    <template is="dom-if" if="{{_isInput(type)}}">
         <div>input node</div>
+        <template is="dom-if" if="{{!component}}">
+          <div>component menu</div>
+        </template>
       </template>
       <template is="dom-if" if="{{_isTransform(type)}}">
         <div>transform node</div>
       </template>
       <template is="dom-if" if="{{_isVisual(type)}}">
         <div>visual node</div>
+      </template>
+       -->
+       <template is="dom-if" if="{{!_displayMenu}}">
+        <div>{{component.name}}</div>
+        <content select="{{component.name}}"></content>
+       </template>
+       
+       <template is="dom-if" if="{{_displayMenu}}">
+        
+       
+        <h2>Input Elements</h2>
+        <template is="dom-repeat" items="{{_filterByInput(componentList)}}" as="component">
+          <li class="item" on-click="addComponent" data-component-name$="{{component.name}}" data-component-friendly$="{{component.friendly}}" data-component-type="input">{{component.friendly}}</li>
+        </template>
+        
+        <h2>Transform Elements</h2>
+        <template is="dom-repeat" items="{{_filterByTransform(componentList)}}" as="component">
+          <li class="item">{{component.friendly}}</li>
+        </template>
+        
+        <h2>Visual Elements</h2>
+        <template is="dom-repeat" items="{{_filterByVisual(componentList)}}" as="component">
+          <li class="item">{{component.friendly}}</li>
+        </template>
+
       </template>
     </template>
   
@@ -28,28 +70,144 @@
       is: 'lens-node',
       properties: {
         type: {
-          type: String
+          type: String,
+          notify: true
+        },
+        componentName: {
+          type: String,
+          value: '<componentName>',
+          notify: true,
+          observer: 'componentNameChanged'
+        },
+        componentList: {
+          type: Array,
+          value: [
+          {name:'lens-data-table', friendly: 'Data table', type: 'input'},
+          {name:'lens-input-simple-api', friendly: 'API Data Loader', type: 'input'},
+          {name:'lens-input-csv', friendly: 'CSV Loader', type: 'input'},
+          {name:'lens-input-enigma', friendly: 'Enigma Data Loader', type: 'input'},
+          
+          {name:'lens-data-find-replace', friendly: 'Find and Replace', type: 'transform'},
+          {name:'lens-data-convert-date', friendly: 'Convert Date Formats', type: 'transform'},
+          {name:'lens-data-geocoder-firebase', friendly: 'Geocodes for Map', type: 'transform'},
+          {name:'lens-data-groupby', friendly: 'Group Data', type: 'transform'},
+          {name:'lens-data-filter', friendly: 'Filter Data', type: 'transform'},
+          {name:'lens-data-sort', friendly: 'Sort Data', type: 'transform'},
+          {name:'lens-data-split', friendly: 'Split Column', type: 'transform'},
+          {name:'lens-data-join', friendly: 'Join Columns', type: 'transform'},
+          {name:'lens-data-formula', friendly: 'Math & Trig Functions', type: 'transform'},
+          {name:'lens-data-array-func', friendly: 'Map/Reduce Function (JavaScript)', type: 'transform'},
+
+          {name:'lens-data-zip', friendly: 'Join Tracks', type: 'join'},
+
+          {name:'lens-viz-am-combo-chart', friendly: 'Bar/Line Combo Chart', type: 'visualize'},
+          {name:'lens-viz-g-map', friendly: 'Google Map', type: 'visualize'},
+          {name:'lens-viz-mapbox', friendly: 'Mapbox Map', type: 'visualize'},
+          {name:'lens-viz-g-bar-chart', friendly: 'Google Bar Chart', type: 'visualize'},
+          {name:'lens-viz-g-line-chart', friendly: 'Google Line Graph', type: 'visualize'},
+          {name:'lens-viz-g-scatter-bubble', friendly: 'Google Bubble Chart', type: 'visualize'},
+          {name:'lens-viz-g-pie-chart', friendly: 'Google Pie Chart', type: 'visualize'}
+          // {name:'lens-viz-line-chart-touch', friendly: 'Thelma Line Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart-horizontal', friendly: 'Thelma Horizontal Bar Chart', type: 'visualize'},
+          // {name:'lens-viz-bar-chart', friendly: 'Thelma Bar Chart', type: 'visualize'}
+        ]
+        },
+        component: {
+          type: Object,
+          notify: true,
+          observer: 'componentChanged'
         }
         
       },
       ready: function(){
-      },
+        console.log(this.componentList)
+        this._displayMenu = true;
 
+      },
+      addComponent: function(e){
+        var name = e.target.dataset.componentName,
+            friendlyName = e.target.dataset.componentFriendly;
+        this.createElementFromSavedData(name, '', friendlyName);
+        // TODO: figure out when to use addComponent and when to use createElementFromSavedData;
+        
+        
+        // var newEl = document.createElement(this.componentName);
+        // this.set('component', {name: e.target.dataset.componentName, tag: newEl, friendly: e.target.dataset.componentFriendly  } );
+        
+        // this.type = e.target.dataset.componentType;
+        // var directory =  "../" + this.componentName + "/" + this.componentName + ".html",
+          // pathToEl = this.resolveUrl(directory);
+          // this.importHref([pathToEl], function(){
+           
+
+          // })
+        
+  
+        
+        // this._displayMenu = false;
+
+      },
+      createElementFromSavedData: function(name, friendlyName, properties){
+        var newEl = document.createElement(name);
+        // TODO assign properties
+        this.set('component', {name: name, tag: newEl, friendly: friendlyName} );
+        Polymer.dom(this).appendChild(newEl);
+        this._displayMenu = false;
+        return newEl;
+      }, 
       // Methods for validating type in template
-      _isInput: function(type){
-        if (type === 'input'){
+      // _isInput: function(type){
+      //   if (type === 'input'){
+      //     return true;
+      //   }
+      // },
+      // _isTransform: function(type){
+      //   if (type === 'transform'){
+      //     return true;
+      //   }
+      // },
+      // _isVisual: function(type){
+      //   if (type === 'visualize'){
+      //     return true;
+      //   }
+      // },
+      _showMenu: function(type){
+        if (!type){
           return true;
         }
       },
-      _isTransform: function(type){
-        if (type === 'transform'){
-          return true;
-        }
+      _filterByInput: function(componentList){
+        var inputs = componentList.filter(function(component){
+          if (component.type === 'input') {
+            return true;
+          }
+        });
+        console.log(inputs);
+        return inputs;
+
       },
-      _isVisual: function(type){
-        if (type === 'visualize'){
-          return true;
-        }
+      _filterByTransform: function(componentList){
+        return componentList.filter(function(component){
+          if (component.type === 'transform') {
+            return true;
+          }
+        });
+
+      },
+      _filterByVisual: function(componentList){
+        return componentList.filter(function(component){
+          if (component.type === 'visualize') {
+            return true;
+          }
+        });
+      },
+      // _checkForComponent: function(component){
+      //   return component ? true : false;
+      // },
+      componentChanged: function(){
+        this.fire('component-name-changed');
+
+        console.log('component name changed');
       }
      
     });
