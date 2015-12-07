@@ -12,6 +12,15 @@
     "lens-visual-elements": "lenses/lens-visual-elements",
     "paper-input": "polymer/paper-input#~0.5.5",
     "paper-dropdown-menu": "polymer/paper-dropdown-menu#~0.5.5",
-    "smooth-scroll": "https://github.com/cferdinandi/smooth-scroll.git"
+    "smooth-scroll": "https://github.com/cferdinandi/smooth-scroll.git",
+    "lens-data-table": "lenses/lens-data-table",
+    "th-data-selector": "lenses/th-data-selector",
+    "lens-data-filter": "lenses/lens-data-filter",
+    "lens-u-options-editor": "lenses/lens-u-options-editor",
+    "paper-toggle-button": "Polymer/paper-toggle-button#~0.5.5",
+    "core-collapse": "polymer/core-collapse#~0.5.5",
+    "core-icon": "polymer/core-icon#~0.5.5",
+    "core-menu": "Polymer/core-menu#~0.5.5",
+    "core-item": "Polymer/core-item#~0.5.5"
   }
 }
