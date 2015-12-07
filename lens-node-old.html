@@ -38,11 +38,11 @@
           </div>
           
           <!-- Data Table -->
-         <!--  <template if="{{component.tagName != 'LENS-DATA-TABLE' && componentOutput.length}}">
+          <template if="{{component.tagName != 'LENS-DATA-TABLE' && componentOutput.length}}">
             <div id="data-container">
               <lens-data-table id="outputTable"  firstRowIsHeader="{{firstRow}}" input="{{componentOutput}}" output="{{output}}" ></lens-data-table>
             </div>
-          </template> -->
+          </template>
  
         </template>
 
@@ -55,14 +55,14 @@
           </div>
 
           <!-- Data table (input & output) --> 
-          <!-- <div id="data-container">
+          <div id="data-container">
             <template if="{{!showOutput}}">
               <lens-data-table id="inputTable" firstRowIsHeader="{{firstRow}}" input="{{input}}" output="{{componentData}}"></lens-data-table>
             </template>
             <template if="{{showOutput}}">
               <lens-data-table id="outputTable" firstRowIsHeader="{{firstRow}}" input="{{componentOutput}}" output="{{output}}" ></lens-data-table>
             </template>
-          </div> -->
+          </div>
 
         </template>
 
@@ -86,12 +86,12 @@
 
           <!-- Data table (input & output) --> 
           <div id="data-container">
-           <!--  <template if="{{!showOutput}}">
+            <template if="{{!showOutput}}">
               <lens-data-table id="inputTable" firstRowIsHeader="{{firstRow}}" input="{{input}}" output="{{componentData}}"></lens-data-table>
             </template>
             <template if="{{showOutput}}">
               <lens-data-table id="outputTable" firstRowIsHeader="{{firstRow}}" input="{{componentOutput}}" output="{{output}}" ></lens-data-table>
-            </template> -->
+            </template>
           </div>
 
         </template>
@@ -103,19 +103,19 @@
 
             <!-- Final result switch --> 
             <template if="{{component}}"> 
-            <!--   <template if="{{finalResult}}">
+              <template if="{{finalResult}}">
                 <paper-toggle-button id="toggle" checked="true" on-click="{{deselectFinalResult}}" ></paper-toggle-button><span class="toggle-text">Selected </span>
               </template>
               <template if="{{!finalResult}}">
                 <paper-toggle-button id="toggle" checked="false" on-click="{{selectFinalResult}}" ></paper-toggle-button><span class="toggle-text">Select as final result? </span>
-              </template> -->
+              </template>
             </template>
 
             <!-- Options editor and component --> 
             <div id="chart-container" style="height:{{component | heightFilter }};">
 
               <!-- Options editor -->
-            <!--   <div id="optionsContainer" class="optionsContainer closed" style="display: {{component | optionsDisplayFilter}}">
+              <div id="optionsContainer" class="optionsContainer closed" style="display: {{component | optionsDisplayFilter}}">
                 <template if="{{!showOptions}}">
                   <core-icon id="open" on-click="{{openOptions}}" icon="chevron-right"></core-icon>
                 </template>
@@ -123,20 +123,20 @@
                   <core-icon id="close" on-click="{{closeOptions}}" icon="chevron-left"></core-icon>
                 </template>
                 <lens-u-options-editor id="options" options="{{component | getMetaData }}" on-th-options-changed="{{componentOptionsChanged}}" selections="{{componentOptions}}"></lens-u-options-editor>
-              </div> -->
+              </div>
                 
               <!-- Component itself -->
               <content id="component"></content>  
 
               <!-- Resize icon -->
-              <!-- <core-icon icon="device:signal-cellular-0-bar" class="resize"  draggable="true"  on-dragStart="{{dragResizeStart}}" on-drag="{{dragResize}}" on-dragEnd="{{dragResizeEnd}}"></core-icon>   -->
+              <core-icon icon="device:signal-cellular-0-bar" class="resize"  draggable="true"  on-dragStart="{{dragResizeStart}}" on-drag="{{dragResize}}" on-dragEnd="{{dragResizeEnd}}"></core-icon>  
             </div>          
           </div>
           <!-- Data Table -->
-          <!-- <div id="data-container"> -->
+          <div id="data-container">
             <!-- Filter Options<lens-data-filter input="{{input}}" output="{{filterOutput}}"></lens-data-filter> -->
-            <!-- <lens-data-table id="inputTable" input="{{filterOutput || input}}" output="{{componentData}}"></lens-data-table> -->
-          <!-- </div> -->
+            <lens-data-table id="inputTable" input="{{filterOutput || input}}" output="{{componentData}}"></lens-data-table>
+          </div>
 
          
         </template>

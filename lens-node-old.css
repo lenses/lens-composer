@@ -1,0 +1,132 @@
+#node{ /* main container */
+  width: 100%;
+  background-color: white;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 5px;
+}
+
+.heading {
+  color: black;
+  font-weight: 600;
+  padding: 5px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+}
+
+.notes paper-input {
+  width: 100%;
+}
+
+
+/* restyle paper input */
+:host /deep/ paper-input-decorator { /* remove padding from paper-input */
+  padding: 0px 10px;
+}
+
+
+paper-input /deep/ #underline > * { /* removes underline from all paper-input */
+  background: none;
+}
+
+#data-container { 
+  padding: 5px;
+  border-top: 3px solid #eee;
+}
+
+#component-container {
+  padding: 5px;
+}
+
+#chart-container {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.optionsContainer {
+  margin-left: 0;
+  width: 300px;
+  height: 100%;
+  position: absolute;
+  transition: 1s;
+  z-index: 1001;
+}
+
+core-item { /* component icon within list of components */
+  margin: 0 5px;
+}
+
+core-item::shadow #label{
+  padding: 5px;
+  background-color: #eee;
+  cursor: pointer;
+  display: inline-block;
+}
+
+#toggle { /* final result switch */
+  float: right;
+}
+
+.toggle-text { /* text next to final result switch */
+  float: right;
+  margin: 0px 5px;
+}
+
+paper-toggle-button::shadow [checked] .toggle {
+  background-color: #536482;
+}
+
+paper-toggle-button::shadow [checked] .toggle-ink {
+  color: #536482;
+}
+
+.resize { /* resize icon in visual node */
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 15px;
+  height: 15px;
+  cursor: s-resize;
+}
+
+.closed { /*  */
+  transition: 1s;
+  margin-left: -300px;
+}
+
+#open, #close {
+  position: absolute;
+  top: 45%;
+  right: -25px;
+  width: 25px;
+  height: 25px;
+  background-color: #536482;
+  color: white;
+  cursor: pointer;
+  z-index: 1001;
+}
+label {
+  display: block;
+  color: #2fa3af;
+}
+
+
+.selector {
+  min-height: 10px;
+  display: inline-block;
+  max-height: 123px;
+  overflow-y: scroll; 
+}
+
+.selector .col {
+  padding: 1px;
+  border: 1px solid #EEE;
+}
+.selector .core-selected {
+  background-color: #ccc;
+
+}
